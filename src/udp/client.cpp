@@ -21,9 +21,11 @@ using namespace std;
 
 int main(int argc, char *argv[]){
 
-    int sd, rc, i;
+    int sd, rc, i, n;
+	socklen_t servLen;
     struct sockaddr_in cliAddr, remoteServAddr;
     struct hostent *h;
+	char msg[MAX_MSG];
     
     /* VERIFICA OS ARGUMENTOS PASSADOS POR LINHA DE COMANDO */
     if(argc<3){
@@ -65,14 +67,22 @@ int main(int argc, char *argv[]){
     }
 
     /* 3. ENVIA DADOS */
-    for(i=2;i<argc;i++)    {
+    for(i=2;i<argc;i++){
         rc = sendto(sd, argv[i], strlen(argv[i])+1, 0, (struct sockaddr *) &remoteServAddr, sizeof(remoteServAddr));
         if(rc<0){
             cout << argv[0] << ": nao foi possivel enviar dados " << argv[i-1] << endl;
             close(sd);
             exit(1);
         }
-    }
+
+		servLen = sizeof(remoteServAddr);
+        n = recvfrom(sd, msg, MAX_MSG, 0, (struct sockaddr *) &remoteServAddr,  &servLen );
+   
+        /* IMPRIME A MENSAGEM RECEBIDA */
+        if(n>=0){
+        	cout << argv[0] << ": de " << inet_ntoa(remoteServAddr.sin_addr) << ":UDP(" << ntohs(remoteServAddr.sin_port) << ") : " << msg << endl;
+		}
+ 	}    
 
     return 1;
 }

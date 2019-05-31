@@ -9,7 +9,9 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <unistd.h> /* close() */
-#include <string.h> /* memset() */
+#include <string.h> /* memset(), strcat e strncat */
+#include <ctime> /** time_t  */
+#include <string>
 #include <iostream>
 #include <cstdlib>
 
@@ -23,6 +25,9 @@ int main(int argc, char *argv[]){
     int sd, rc, n; socklen_t cliLen;
     struct sockaddr_in cliAddr, servAddr;
     char msg[MAX_MSG];
+    string msgAnswer = "";
+    time_t timer;
+    struct tm *horarioLocal; 
 
     /* 1. CRIA O SOCKET */
     sd=socket(AF_INET, SOCK_DGRAM, 0);
@@ -38,15 +43,18 @@ int main(int argc, char *argv[]){
     rc = bind (sd, (struct sockaddr *) &servAddr,sizeof(servAddr));
     
     if(rc<0){
-    cout << argv[0] << ": nao foi possivel associar a porta"
-         << LOCAL_SERVER_PORT << endl;
-    exit(1);
+    	cout << argv[0] 
+	     << ": nao foi possivel associar a porta"
+             << LOCAL_SERVER_PORT << endl;
+    	
+	exit(1);
     }
+    
     cout << argv[0] << ": aguardando por dados na porta UDP("
          << LOCAL_SERVER_PORT << ")" << endl;
 
     /* 3. LOOP INFINITO PARA LEITURA (LISTEN) */
-    while(1){
+    while(true){
         
         /* INICIA O BUFFER DE COMUNICACAO */
         memset(msg,0x0,MAX_MSG);
@@ -62,7 +70,29 @@ int main(int argc, char *argv[]){
         
         /* IMPRIME A MENSAGEM RECEBIDA */
         cout << argv[0] << ": de " << inet_ntoa(cliAddr.sin_addr) << ":UDP(" << ntohs(cliAddr.sin_port) << ") : " << msg << endl;
-   
+	
+	/* RESPONDENDO O CLIENTE */
+	msgAnswer = "";
+	msgAnswer += "Mensagem ";
+	msgAnswer += msg;
+	msgAnswer += " recebida as 99h99 (";
+	
+	time( &timer);
+	horarioLocal = localtime( &timer);	
+	
+	msgAnswer += to_string(horarioLocal->tm_hour);
+	msgAnswer += ":";
+    	msgAnswer += to_string(horarioLocal->tm_min);
+	msgAnswer += ":";
+    	msgAnswer += to_string(horarioLocal->tm_sec);
+	msgAnswer += ")";
+	
+	sendto(sd, msgAnswer.c_str(), MAX_MSG, 0, (struct sockaddr *) &cliAddr, cliLen );
+
+	if( string( msg) == "tchau" ){
+		break;
+	}  
+
     }/* FIM DO LOOP INFINITO */
 
     return 0;
