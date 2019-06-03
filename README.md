@@ -2,7 +2,7 @@
 
 ## Introdução  
 
-Nesta pasta contém a implementação de um socket nas linguagens de programacao C++, Java e Python que faz o uso do protocolo da camada de transporte TCP ou UDP referente ao trabalho da 2a unidade da disciplina de _Redes de Computadores_ ministrada pelo dr. Silvio da Costa Sampaio.
+Nesta pasta contém a implementação de um socket nas linguagens de programacao C++, Java e Python que faz o uso do protocolo da camada de transporte TCP ou UDP referente ao trabalho da 2ª unidade da disciplina de _Redes de Computadores_, ministrada pelo dr. Silvio da Costa Sampaio, do bacharelado em Tecnologia da Informação na Universidade Federal do Rio Grande do Norte (__UFRN__).
 
 - [Objetivo](#objetivo) - Objetivo da implementacao.
 - [Compilação e execução](#compilação-e-execução) - Como compilar e executar o projeto
