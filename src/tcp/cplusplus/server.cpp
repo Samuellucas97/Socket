@@ -15,22 +15,39 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
-#define HOST "192.168.7.1"
 #define PORT_NUMBER 4339    /// Numero da porta usada pelo socket do Servidor
 #define QUEUE_SIZE_OF_REQUISITIONS 10   /// Tamanho da lista de requisicoes
 #define MESSAGE_SIZE 40 /// Quantidade de caracteres que uma mensagem pode transmitir  
 
 int main(){
 
-    char bufferServer[MESSAGE_SIZE]=""; //-> Buffer que guardara a mensagem recebida e a que sera enviada
+    char msg[MESSAGE_SIZE]=""; //-> Buffer que guardara a mensagem recebida e a que sera enviada
     int socketId_Client_Conexao; //-> Indica se houve falha ou nao na retirada da requisicao da fila de requisicoes
     int messageSizeReceived; //-> Tamanho da mensagem recebida
-    std::string serverResponse; //-> Resposta do Servidor entrada pelo usuario
+    std::string msgAnswer; //-> Resposta do Servidor entrada pelo usuario
+	struct hostent *h;
+	struct sockaddr_in addrCliente;   
+		
+	/* VERIFICA OS ARGUMENTOS PASSADOS POR LINHA DE COMANDO */
+    if(argc<3){
+        std::cout << "Uso : " << argv[0]
+        << " <servidor> <mensagem1> ... <mensagemN>" << std::endl;
+        exit(1);
+    }
+
+    /* OBTEM O ENDERECO IP e PESQUISA O NOME NO DNS */
+    host = gethostbyname(argv[1]);
+    if( host == NULL){
+        cout << argv[0] << ": host desconhecido " << argv[1] << std::endl;
+        exit(1);
+    }
+    std::cout << argv[0] << ": enviando dados para " << h->h_name
+         << " (IP : " << inet_ntoa(*(struct in_addr *)h->h_addr_list[0]) << std::endl;
 
 
     /// CONFIGURANDO PROPRIEDADES DE CONEXÃO
     struct sockaddr_in addrServer;
-    addrServer.sin_addr.s_addr = inet_addr( HOST );
+    addrServer.sin_addr.s_addr = inet_addr( host );
     addrServer.sin_port = htons( PORT_NUMBER );
     addrServer.sin_family = AF_INET;
 
@@ -67,59 +84,59 @@ int main(){
 
     std::cout << "O socket do Servidor esta ouvindo se ha requisicoes..." << std::endl;
 
-    /// RETIRANDO REQUISIÇÃO PENDENTE DA CABEÇA DA FILA DE REQUISIÇÕES
-    struct sockaddr_in addrCliente;   
-    socklen_t cliente_len = sizeof(addrCliente);
+	while(true){
+		
+		/// RETIRANDO REQUISIÇÃO PENDENTE DA CABEÇA DA FILA DE REQUISIÇÕES
+		socklen_t cliente_len = sizeof(addrCliente);
 
-    socketId_Client_Conexao = accept( socketId_Server,
-                                (struct sockaddr*)& addrCliente,
-                                &cliente_len);
+		socketId_Client_Conexao = accept( socketId_Server,
+		                            (struct sockaddr*)& addrCliente,
+		                            &cliente_len);
 
-    std::cout << "Socket do Servidor recebeu conexao de " << inet_ntoa(addrCliente.sin_addr) << std::endl;
+		std::cout << "Socket do Servidor recebeu conexao de " << inet_ntoa(addrCliente.sin_addr) << std::endl;
 
-    if( socketId_Client_Conexao == -1 ){
-        std::cerr << "Falha ao retira requisicao da frente da fila de requisicoes..." << std::endl;
-        exit(EXIT_FAILURE);
-    }    
-    
-    std::cout << "Requisicao retirada da frente da fila de requisicoes com sucesso" << std::endl;
-        
-    /// ENVIANDO MENSAGEM DO SOCKET DO SERVIDOR PARA O SOCKET DO CLIENTE 
+		if( socketId_Client_Conexao == -1 ){
+		    std::cerr << "Falha ao retira requisicao da frente da fila de requisicoes..." << std::endl;
+		    exit(EXIT_FAILURE);
+		}    
+		
+		std::cout << "Requisicao retirada da frente da fila de requisicoes com sucesso" << std::endl;
+		    		
+		/// SOCKET DO SERVIDOR **COMUNICANDO-SE** COM O SOCKET DO CLIENTE
+		while (true){
+		   
+			messageSizeReceived = recv( socketId_Client_Conexao, 
+		                                    msg,
+		                                    MESSAGE_SIZE, 0 );
 
-    if ( send( socketId_Client_Conexao, 
-               "Oi cliente! Voce estah pronto?\n", 
-               MESSAGE_SIZE, 0 
-            ) == -1 ){
-	fflush(stderr);
-	std::cerr << "Falha no envio da mensagem por parte do socket do Servidor..." << std::endl;
-	exit(EXIT_FAILURE);                           
-    }
+		    if( messageSizeReceived > 0 ){  /// Situação em que o cliente mandou uma mensagem não vazia
+		        
+		        std::cout << "Cliente disse: " << msg[0] << std::endl;
 
-    std::cout <<"O socket do Servidor enviou uma mensagem. Logo o cliente esta conectado" << std::endl << std::endl;
-    
-    /// SOCKET DO SERVIDOR **COMUNICANDO-SE** COM O SOCKET DO CLIENTE
-    while (true){
-       fflush(stdout); 
-        messageSizeReceived = recv( socketId_Client_Conexao, 
-                                        bufferServer,
-                                        MESSAGE_SIZE, 0 );
+		        if( std::string(1, msg[0]) == "" ){
+		            send( socketId_Client_Conexao, "Sem comando", MESSAGE_SIZE, 0 );
+		            break;
 
-        if( messageSizeReceived > 0 ){  /// Situação em que o cliente mandou uma mensagem não vazia
-            
-            std::cout << "Cliente disse: " << bufferServer[0] << std::endl;
+		        }
 
-            if( std::string(1, bufferServer[0]) == "" ){
-                send( socketId_Client_Conexao, "Sem comando", MESSAGE_SIZE, 0 );
-                break;
-
-            }
-
-        }
-
-	fflush(stdin);
-        std::getline(std::cin, serverResponse);
-	strcpy(bufferServer,serverResponse.c_str()); 
-        send( socketId_Client_Conexao, bufferServer, MESSAGE_SIZE, 0 );
+		    }
+	
+		msgAnswer = "";
+		msgAnswer += "Mensagem ";
+		msgAnswer += msg;
+		msgAnswer += " recebida as 99h99 (";
+	
+		time( &timer);
+		horarioLocal = localtime( &timer);	
+	
+		msgAnswer += to_string(horarioLocal->tm_hour);
+		msgAnswer += ":";
+			msgAnswer += to_string(horarioLocal->tm_min);
+		msgAnswer += ":";
+			msgAnswer += to_string(horarioLocal->tm_sec);
+		msgAnswer += ")";
+	
+		send( socketId_Client_Conexao, msgAnswer.c_str(), MESSAGE_SIZE, 0 );
 
     }
 
