@@ -6,6 +6,7 @@
 #include <iostream>
 #include <string>
 #include <cstring>
+#include <thread>
 
 /// BIBLIOTECAS P/ SOCKETS
 #include <arpa/inet.h>
@@ -19,17 +20,61 @@
 #define QUEUE_SIZE_OF_REQUISITIONS 10   /// Tamanho da lista de requisicoes
 #define MESSAGE_SIZE 40 /// Quantidade de caracteres que uma mensagem pode transmitir  
 
-int main(){
-
-    char msg[MESSAGE_SIZE]=""; //-> Buffer que guardara a mensagem recebida e a que sera enviada
-    int socketId_Client_Conexao; //-> Indica se houve falha ou nao na retirada da requisicao da fila de requisicoes
+/**
+ * @brief   Ocorre a comunicacao entre o servidor e o cliente
+ */
+void comunicandoComCliente( int socketId_Client_Conexao ) {
+    
+    char msg[MESSAGE_SIZE] = ""; //-> Buffer que guardara a mensagem recebida e a que sera enviada
     int messageSizeReceived; //-> Tamanho da mensagem recebida
     std::string msgAnswer; //-> Resposta do Servidor entrada pelo usuario
-	struct hostent *h;
+    
+
+    /// SOCKET DO SERVIDOR **COMUNICANDO-SE** COM O SOCKET DO CLIENTE
+    while (true){
+       
+        messageSizeReceived = recv( socketId_Client_Conexao, msg, MESSAGE_SIZE, 0 );
+
+        if( messageSizeReceived > 0 ){  /// Situação em que o cliente mandou uma mensagem não vazia
+            
+            std::cout << "Cliente disse: " << msg[0] << std::endl;
+
+            if( std::string(1, msg[0]) == "" ){
+                send( socketId_Client_Conexao, "Sem comando", MESSAGE_SIZE, 0 );
+                break;
+            }
+
+        }
+
+        msgAnswer = "";
+        msgAnswer += "Mensagem ";
+        msgAnswer += msg;
+        msgAnswer += " recebida as 99h99 (";
+
+        time( &timer);
+        horarioLocal = localtime( &timer);  
+
+        msgAnswer += to_string(horarioLocal->tm_hour);
+        msgAnswer += ":";
+        msgAnswer += to_string(horarioLocal->tm_min);
+        msgAnswer += ":";
+        msgAnswer += to_string(horarioLocal->tm_sec);
+        msgAnswer += ")";
+
+        send( socketId_Client_Conexao, msgAnswer.c_str(), MESSAGE_SIZE, 0 );
+    }
+
+}
+
+int main(){
+
+    int socketId_Client_Conexao; //-> Indica se houve falha ou nao na retirada da requisicao da fila de requisicoes
+    struct hostent *h;
 	struct sockaddr_in addrCliente;   
-		
+	std::vector<std::thread> conexoesServidor;
+
 	/* VERIFICA OS ARGUMENTOS PASSADOS POR LINHA DE COMANDO */
-    if(argc<3){
+    if(argc < 3){
         std::cout << "Uso : " << argv[0]
         << " <servidor> <mensagem1> ... <mensagemN>" << std::endl;
         exit(1);
@@ -37,13 +82,13 @@ int main(){
 
     /* OBTEM O ENDERECO IP e PESQUISA O NOME NO DNS */
     host = gethostbyname(argv[1]);
-    if( host == NULL){
+    if(host == NULL){
         cout << argv[0] << ": host desconhecido " << argv[1] << std::endl;
         exit(1);
     }
+    
     std::cout << argv[0] << ": enviando dados para " << h->h_name
          << " (IP : " << inet_ntoa(*(struct in_addr *)h->h_addr_list[0]) << std::endl;
-
 
     /// CONFIGURANDO PROPRIEDADES DE CONEXÃO
     struct sockaddr_in addrServer;
@@ -64,10 +109,7 @@ int main(){
     std::cout << "Socket Servidor criado com sucesso" << std::endl;
 
     /// LIGANDO O SOCKET CRIADO DO SERVIDOR À PORTA PORT_NUMBER
-    if( bind( socketId_Server,
-              (struct sockaddr*) &addrServer,
-              sizeof(addrServer)   
-            ) != 0 ){
+    if( bind( socketId_Server, (struct sockaddr*) &addrServer, sizeof(addrServer) ) != 0 ){
         std::cerr << "Falha em ligar o socket do Servidor a porta " + std::to_string(PORT_NUMBER) << "..." << std::endl;
         exit(EXIT_FAILURE);                
     }
@@ -75,9 +117,7 @@ int main(){
     std::cout << "A ligacao do socket do Servidor a porta " + std::to_string( PORT_NUMBER) + " foi um sucesso" << std::endl;
 
     /// HABILITA O SOCKET DO SERVIDOR A ESCUTAR REQUISIÇÕES 
-    if( listen( socketId_Server, 
-                QUEUE_SIZE_OF_REQUISITIONS
-               ) != 0){
+    if( listen( socketId_Server, QUEUE_SIZE_OF_REQUISITIONS ) != 0){
         std::cerr << "Falha em fazer o socket do Servidor escutar requisicoes..." << std::endl;
         exit(EXIT_FAILURE);                           
     }
@@ -100,46 +140,15 @@ int main(){
 		    exit(EXIT_FAILURE);
 		}    
 		
+        for( std::thread & th: conexoesServidor){
+
+            if( th.joinable() )
+                th.join();
+        }
+
 		std::cout << "Requisicao retirada da frente da fila de requisicoes com sucesso" << std::endl;
 		    		
-		/// SOCKET DO SERVIDOR **COMUNICANDO-SE** COM O SOCKET DO CLIENTE
-		while (true){
-		   
-			messageSizeReceived = recv( socketId_Client_Conexao, 
-		                                    msg,
-		                                    MESSAGE_SIZE, 0 );
-
-		    if( messageSizeReceived > 0 ){  /// Situação em que o cliente mandou uma mensagem não vazia
-		        
-		        std::cout << "Cliente disse: " << msg[0] << std::endl;
-
-		        if( std::string(1, msg[0]) == "" ){
-		            send( socketId_Client_Conexao, "Sem comando", MESSAGE_SIZE, 0 );
-		            break;
-
-		        }
-
-		    }
-	
-		msgAnswer = "";
-		msgAnswer += "Mensagem ";
-		msgAnswer += msg;
-		msgAnswer += " recebida as 99h99 (";
-	
-		time( &timer);
-		horarioLocal = localtime( &timer);	
-	
-		msgAnswer += to_string(horarioLocal->tm_hour);
-		msgAnswer += ":";
-			msgAnswer += to_string(horarioLocal->tm_min);
-		msgAnswer += ":";
-			msgAnswer += to_string(horarioLocal->tm_sec);
-		msgAnswer += ")";
-	
-		send( socketId_Client_Conexao, msgAnswer.c_str(), MESSAGE_SIZE, 0 );
-
     }
-
 
     //// QUEBRANDO CONEXÃO ENTRE O SOCKET DO SERVIDOR E O DO CLIENTE
     close(socketId_Client_Conexao);
