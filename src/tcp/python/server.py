@@ -21,7 +21,12 @@ with socket.socket( socket.AF_INET, socket.SOCK_STREAM ) as socketServidor:     
             now = datetime.now()
             data = conn.recv(MESSAGE_SIZE)  # Recebendo mensagem do socket do Cliente
             print("Cliente disse:" + data.decode() + "\n")
+
             if not data or data.decode() == "tchau":
                 conn.send( str.encode( "tchau" ) )
                 break
-            conn.send( str.encode( now.strftime("%H:%M:%S") ) ) # Enviando mensagem para socket do Cliente
+
+            backMassage = ('Mensagem "' + data.decode() + '" recebida as ' + now.strftime("%H:%M:%S") )
+            conn.send( str.encode( backMassage ) ) # Enviando mensagem para socket do Cliente
+
+        socketServidor.close()
