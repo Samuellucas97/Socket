@@ -11,7 +11,7 @@ BIN_DIR=./bin
 DOC_DIR=./doc
 
 # Opcoes de compilacao 
-CFLAGS=	-Wall -pedantic -ansi -std=c++11
+CFLAGS=	-Wall -pedantic -ansi -std=c++11 -pthread
 
 # Garante que os alvos desta lista não sejam confundidos com arquivos de mesmo nome 
 .PHONY:	all	clean doc debug

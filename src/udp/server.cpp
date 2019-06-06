@@ -47,7 +47,7 @@ int main(int argc, char *argv[]){
 	     << ": nao foi possivel associar a porta"
              << LOCAL_SERVER_PORT << endl;
     	
-	exit(1);
+	    exit(1);
     }
     
     cout << argv[0] << ": aguardando por dados na porta UDP("
