@@ -8,7 +8,7 @@ import java.net.Socket;
 import java.util.Date;
 import java.text.SimpleDateFormat;
 
-public class TCP_Server {
+public class server {
     static int cont = 0;
     static Date tempoLocal;
     static SimpleDateFormat ft = new SimpleDateFormat("HH:mm:ss");
@@ -20,6 +20,7 @@ public class TCP_Server {
 
         while (true) {
             System.out.println("Agurdando conexão...");
+            System.out.println("");
 
             final Socket activeSocket = serverSocket.accept();
 
@@ -50,14 +51,14 @@ public class TCP_Server {
                 }
                 System.out.println("Cliente : " + inMsg);
                 
-                String outMsg = "Mensagem recebida às: " + ft.format(tempoLocal);
+                String outMsg = "\nMensagem recebida às: " + ft.format(tempoLocal);
                 socketWriter.write(outMsg);
                 socketWriter.write("\n");
                 socketWriter.flush();
             }
             socket.close();
         } catch (Exception e) {
-            System.out.println("A conexão foi encerrada inesperadamente pelo Cliente " + "");
+            System.out.println("\nA conexão foi encerrada inesperadamente pelo Cliente " + "");
             System.out.println("");
         }
     }
