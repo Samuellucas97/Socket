@@ -14,8 +14,8 @@ public class server{
         //Criação e associação do socket ao endereço do servidor
         ServerSocket serverSocket = new ServerSocket(12900, 100, InetAddress.getLocalHost());
         //Mostra as informações do socket ao usuário
-        System.out.println("Servidor iniciado em: " + serverSocket.getInetAddress() + " - " + serverSocket.getLocalPort());
-        System.out.println("Agurdando conexão...");
+        System.out.println("Servidor iniciado no endereço " + serverSocket.getInetAddress());
+        System.out.println("Agurdando conexão na porta: " + serverSocket.getLocalPort());
         System.out.println("");
         
         //Laço infinito para aceitar as conexões ao servidor e inicia uma thread com o cliente
@@ -47,8 +47,8 @@ public class server{
             connectedSockets.put(socket, identifier);
             System.out.println(identifier + " se conectou.\n");
             outMsg = "Servidor: mensagem recebida às: " + ft.format(tempoLocal);
-            socketWriter.write(outMsg);
-            socketWriter.write("\n");
+            socketWriter.write(outMsg + "\n");
+            socketWriter.write("Bem-vindo(a) a conversa " + identifier + "\n");
             socketWriter.flush();
             
             //Verifica a lista de clientes para mandar mensagem aos demais sobre a entrada do novo cliente

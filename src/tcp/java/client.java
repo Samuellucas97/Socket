@@ -6,51 +6,55 @@ public class client{
     public static void main(String[] args) throws Exception{
         //Criação do socket e chamada de função para realizar a conexão com o servidor
         Socket serverSocket = connectServer();
-        System.out.println("Conectado ao servidor em: " + serverSocket);
+        System.out.println("Enviando dados para o endereço IP: " + serverSocket.getInetAddress());
         
         //Criação dos buffers de escrita e leitura para usar na conexão
-        BufferedReader socketReader = new BufferedReader(new InputStreamReader(serverSocket.getInputStream()));
         BufferedWriter socketWriter = new BufferedWriter(new OutputStreamWriter(serverSocket.getOutputStream()));
         BufferedReader consoleReader = new BufferedReader(new InputStreamReader(System.in));
-        String outMsg, inMsg;
-        
-        //Informações de uso do chat
-        System.out.println("\nInformações para uso do chat:.");
-        System.out.println("Caso não queira digitar nada, pressione apenas Enter.");
-        System.out.println("Digite \"sair\" para sair.\n");
+        String outMsg;
         
         try{
+            //Criação de um thread para ficar sempre ouvindo em busca de mensagens
+            Runnable receiver = () -> receiveData(serverSocket);
+            new Thread(receiver).start();
+            
             //Respondendo ao servidor com a identificação pedida
-            inMsg = socketReader.readLine();
-            System.out.println(inMsg);
             outMsg = consoleReader.readLine();
             socketWriter.write(outMsg + "\n");
             socketWriter.flush();
-            inMsg = socketReader.readLine();
-            System.out.println(inMsg + "\n");
-            outMsg = "";
+            System.out.println("");
             
+            System.out.println("Digite \"sair\" para encerrar o bate-papo.");
             //Laço para receber e enviar mensagens ao servidor
-            do{
-                if(!(outMsg.isEmpty())){
-                    socketWriter.write(outMsg + "\n");
-                    socketWriter.flush();
-                    inMsg = socketReader.readLine();
-                    System.out.println(inMsg);
-                }
-                inMsg = socketReader.readLine();
-                if (inMsg.equalsIgnoreCase("sair")) {
-                    System.out.println("Conexão encerrada.");
-                    System.exit(0);
-                }
-                System.out.println(inMsg);
-                System.out.println("Digite algo para continuar a conversa.");
-            }while(((outMsg = consoleReader.readLine()) != null));
-            serverSocket.close();
+            while((outMsg = consoleReader.readLine()) != null){
+                socketWriter.write(outMsg + "\n");
+                socketWriter.flush();
+            }
         }catch(Exception e){
             //Exceção para quando o servidor encerra a conexão sem avisar
             System.out.println("A conexão com o servidor foi encerrada.");
             System.out.println("A aplicação será encerrada.");
+            serverSocket.close();
+        }
+    }
+    
+    //Funcção para ficar ouvindo até receber uma mensagem e a imprime na tela
+    public static void receiveData(Socket socket_){
+        String inMsg;
+        try{
+            //Criação do buffer de leitura do socket
+            BufferedReader socketReader = new BufferedReader(new InputStreamReader(socket_.getInputStream()));
+            while((inMsg = socketReader.readLine()) != null){
+                //Condicional para receber mensagem de saida do servidor e encerrar a conexão.
+                if (inMsg.equalsIgnoreCase("sair")) {
+                    System.out.println("Conexão encerrada.");
+                    socket_.close();
+                    System.exit(0);
+                }
+                System.out.println(inMsg);
+            }
+        }catch(Exception e){
+            System.out.println("Houve um erro com a leitura da mensagem recebida");
         }
     }
     
