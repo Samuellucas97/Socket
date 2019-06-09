@@ -23,7 +23,7 @@ O diretorio raiz contem as seguinte subpastas:
   
 ## Autores  
 
-| Nome do autor: | email: | 
+| Nome do autor: | Github: | 
 | ---------- | ------------- |
 |`Clenilson Jose Silva de Sousa`| _https://github.com/ClenilsonSilva4_    
 |`Felipe Tiberio Maciel Barbosa`| _https://github.com/FelipeTiberio_  

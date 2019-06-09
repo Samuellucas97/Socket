@@ -23,6 +23,6 @@ por exemplo, caso seja o socket cliente que faz uso do protocolo [UDP], `client.
 $ python3 ./src/udp/client.py
 ```  
 
-Dessa forma, sempre sera `pytho3 ./src/*PROTOCOL_NAME*/*CLIENT_OR_SERVER*`.
+Dessa forma, sempre sera `python3 ./src/*PROTOCOL_NAME*/*CLIENT_OR_SERVER*`.
 
 [UDP]:https://pt.wikipedia.org/wiki/User_Datagram_Protocol
