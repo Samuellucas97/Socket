@@ -4,18 +4,23 @@ import java.util.Scanner;
 
 public class client{
     public static void main(String[] args) throws Exception{
+        //Criação do socket e chamada de função para realizar a conexão com o servidor
         Socket serverSocket = connectServer();
         System.out.println("Conectado ao servidor em: " + serverSocket);
+        
+        //Criação dos buffers de escrita e leitura para usar na conexão
         BufferedReader socketReader = new BufferedReader(new InputStreamReader(serverSocket.getInputStream()));
         BufferedWriter socketWriter = new BufferedWriter(new OutputStreamWriter(serverSocket.getOutputStream()));
         BufferedReader consoleReader = new BufferedReader(new InputStreamReader(System.in));
         String outMsg, inMsg;
         
+        //Informações de uso do chat
         System.out.println("\nInformações para uso do chat:.");
         System.out.println("Caso não queira digitar nada, pressione apenas Enter.");
         System.out.println("Digite \"sair\" para sair.\n");
         
         try{
+            //Respondendo ao servidor com a identificação pedida
             inMsg = socketReader.readLine();
             System.out.println(inMsg);
             outMsg = consoleReader.readLine();
@@ -25,6 +30,7 @@ public class client{
             System.out.println(inMsg + "\n");
             outMsg = "";
             
+            //Laço para receber e enviar mensagens ao servidor
             do{
                 if(!(outMsg.isEmpty())){
                     socketWriter.write(outMsg + "\n");
@@ -42,23 +48,31 @@ public class client{
             }while(((outMsg = consoleReader.readLine()) != null));
             serverSocket.close();
         }catch(Exception e){
+            //Exceção para quando o servidor encerra a conexão sem avisar
             System.out.println("A conexão com o servidor foi encerrada.");
             System.out.println("A aplicação será encerrada.");
         }
     }
     
+    //Função para realizar a conexão ao servidor
     public static Socket connectServer(){
         Socket socket = null;
         boolean condicao = true, excecao = true;
         Scanner leitor = new Scanner(System.in);
         String[] sepSocket;
         String getSocket;
+        
+        //Laço para receber as informações para tentar se conectar ao servidor
         do{
             System.out.println("Digite o IP do servidor seguido da porta: (x.y.w.z 00000).");
             getSocket = leitor.nextLine();
             sepSocket = getSocket.split(" ");
+            
+            //Condicional para verificar se recebeu a quantidade correta de dados.
             if(sepSocket.length == 2){
                 do{
+                    //Tenta conectar ao servidor com as informações que foram passadas
+                    //Caso não consiga, dá opções ao cliente
                     try{
                         socket = new Socket(sepSocket[0], Integer.parseInt(sepSocket[1]));
                         System.out.println("\nConexão ao servidor realizada com sucesso." + "\n");
@@ -79,6 +93,7 @@ public class client{
                     }
                 }while(excecao);
             }else{
+                //Mensagem de erro caso receba um valor de dados diferentes de dois
                 System.out.println("Certifique-se de digitar o IP juntamente com a porta.");
                 condicao = true;
             }
