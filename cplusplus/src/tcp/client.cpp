@@ -13,7 +13,7 @@
 #include <netinet/in.h>  /// AF_INET
 #include <unistd.h>
 
-#define LOCAL_SERVER_PORT 1500
+#define LOCAL_SERVER_PORT 4504
 #define MAX_MSG 100 /// Quantidade de caracteres que uma mensagem pode transmitir  
 
 int main(){ 

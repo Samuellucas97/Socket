@@ -18,15 +18,15 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
-#define LOCAL_SERVER_PORT 1500    /// Numero da porta usada pelo socket do Servidor
+#define LOCAL_SERVER_PORT 4504    /// Numero da porta usada pelo socket do Servidor
 #define QUEUE_SIZE_OF_REQUISITIONS 10   /// Tamanho da lista de requisicoes
-#define MAX_MSG 40 /// Quantidade de caracteres que uma mensagem pode transmitir  
+#define MAX_MSG 100 /// Quantidade de caracteres que uma mensagem pode transmitir  
 
 /**
  * @brief   Ocorre a comunicacao entre o servidor e o cliente
  * @param   socketId_Client_Conexao 
  */
-void comunicandoComCliente( int & socketId_Client_Conexao );
+void* comunicandoComCliente( void *arg, struct in_addr addrCliente_sin_addr );
 
 int main(int argc, char* argv[]){
 
@@ -72,8 +72,8 @@ int main(int argc, char* argv[]){
     }
     
 	while(true){
-		
-		/// RETIRANDO REQUISIÇÃO PENDENTE DA CABEÇA DA FILA DE REQUISIÇÕES
+
+     	/// RETIRANDO REQUISIÇÃO PENDENTE DA CABEÇA DA FILA DE REQUISIÇÕES
 		socklen_t cliente_len = sizeof(addrCliente);
 		socketId_Client_Conexao = accept( socketId_Server, (struct sockaddr*)& addrCliente, &cliente_len);
 
@@ -83,20 +83,13 @@ int main(int argc, char* argv[]){
 		    std::cerr << "Falha ao retira requisicao da frente da fila de requisicoes..." << std::endl;
 		    exit(EXIT_FAILURE);
 		}    
-		else{
+		
             std::cout << "Requisicao retirada da frente da fila de requisicoes com sucesso" << std::endl;
 
             /// ADICIONANDO COMUNICACAO COM SER
-            std::thread th (comunicandoComCliente, std::ref(socketId_Client_Conexao) ); 
-            conexoesServidor.push_back( std::move(th) );
-
-            for( std::thread & th: conexoesServidor){
-
-                if( th.joinable() )
-                    th.join();
-            }
-        
-        }
+            std::thread th (comunicandoComCliente, &socketId_Client_Conexao, addrCliente.sin_addr );                    
+           th.detach();
+            
 
     }
 
@@ -113,8 +106,9 @@ int main(int argc, char* argv[]){
  * @brief   Ocorre a comunicacao entre o servidor e o cliente
  * @param   socketId_Client_Conexao 
  */
-void comunicandoComCliente( int & socketId_Client_Conexao ){
+void* comunicandoComCliente( void *arg, struct in_addr addrCliente_sin_addr ){
     
+	int socketId_Client_Conexao = *((int *)arg);
     char msg[MAX_MSG] = ""; //-> Buffer que guardara a mensagem recebida e a que sera enviada
     int messageSizeReceived; //-> Tamanho da mensagem recebida
     std::string msgAnswer; //-> Resposta do Servidor entrada pelo usuario
@@ -123,33 +117,34 @@ void comunicandoComCliente( int & socketId_Client_Conexao ){
 
     /// SOCKET DO SERVIDOR **COMUNICANDO-SE** COM O SOCKET DO CLIENTE
     while (true){
-        
+
         /// RECEBENDO MENSAGEM DO SOCKET CLIENTE
         memset(msg,0x0,MAX_MSG);
         messageSizeReceived = recv( socketId_Client_Conexao, msg, MAX_MSG, 0 );
 
-        if( messageSizeReceived > 0 ){  /// Situação em que o cliente mandou uma mensagem não vazia
+        if( strlen(msg) > 0){  /// Situação em que o cliente mandou uma mensagem não vazia
 
-            std::cout << "Cliente disse: " << msg << std::endl;
+            std::cout << "\nCliente (IP: " << inet_ntoa(addrCliente_sin_addr)  << ") disse: " << msg << "\n";
+
+		    /// ENVIANDO MENSAGEM PARA O SOCKET CLIENTE
+		    time( &timer);
+		    horarioLocal = localtime( &timer);  
+
+		    msgAnswer = "";
+		    msgAnswer += "Mensagem ";
+		    msgAnswer += msg;
+		    msgAnswer += " recebida as 99h99 (";
+		    msgAnswer += std::to_string(horarioLocal->tm_hour);
+		    msgAnswer += ":";
+		    msgAnswer += std::to_string(horarioLocal->tm_min);
+		    msgAnswer += ":";
+		    msgAnswer += std::to_string(horarioLocal->tm_sec);
+		    msgAnswer += ")";
+
+		    send( socketId_Client_Conexao, msgAnswer.c_str(), MAX_MSG, 0 );
 
         }
     
-        /// ENVIANDO MENSAGEM PARA O SOCKET CLIENTE
-        time( &timer);
-        horarioLocal = localtime( &timer);  
-
-        msgAnswer = "";
-        msgAnswer += "Mensagem ";
-        msgAnswer += msg;
-        msgAnswer += " recebida as 99h99 (";
-        msgAnswer += std::to_string(horarioLocal->tm_hour);
-        msgAnswer += ":";
-        msgAnswer += std::to_string(horarioLocal->tm_min);
-        msgAnswer += ":";
-        msgAnswer += std::to_string(horarioLocal->tm_sec);
-        msgAnswer += ")";
-
-        send( socketId_Client_Conexao, msgAnswer.c_str(), MAX_MSG, 0 );
     
     }
 
