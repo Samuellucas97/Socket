@@ -35,13 +35,21 @@ Em seguida, serão criados os seguintes arquivos binários (executáveis):
 |`tcpServer` 	|Programa que implementa socket servidor que faz uso do protocolo TCP.
 
 Diante disso, são necessários dois passos para realzar a execução.
-No primeiro passo, basta digitar make run mais o procotocolo que a aplicação faz uso. Logo, por exemplo, caso seja o `udp`
+No primeiro passo, basta digitar cd class/ mais o nome da pasta correspondete ao procotocolo que a aplicação faz uso. Logo, por exemplo, caso seja o `udp`
 
 ```
-$ make runUdp
+$ cd class/udp
 ```
 Para o segundo passo basta digitar java mais o nome do executável, por exemplo:
 
 ```
-$ java tcpClient
+$ java udpClient
+```
+É importante lembrar que o segundo passo, o nome do executável tem que corresponder ao protocolo usado no primeiro passo.
+
+Caso queira voltar para a pasta principal, basta:
+
+```
+$ cd
+$ cd java
 ```
