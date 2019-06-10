@@ -15,12 +15,12 @@ Faz-se necessario que haja o Java Development Kit (**JDK**) instalado na maquina
 
 ## Compilação e execução  
 
-execute na linha de terminal para a compilação e criação do objetos
+Execute na linha de terminal para a compilação e criação do objetos:
 
 ```
 $ make
 ```  
-Ou, caso deseje apagar os objetos e os executáveis, digite  
+Ou, caso deseje apagar os objetos e os executáveis, digite:
 
 ```
 $ make clean
@@ -35,7 +35,7 @@ Em seguida, serão criados os seguintes arquivos binários (executáveis):
 |`tcpServer` 	|Programa que implementa socket servidor que faz uso do protocolo TCP.
 
 Diante disso, são necessários dois passos para realzar a execução.
-No primeiro passo, basta digitar cd class/ mais o nome da pasta correspondete ao procotocolo que a aplicação faz uso. Logo, por exemplo, caso seja o `udp`
+No primeiro passo, basta digitar cd class/ mais o nome da pasta correspondete ao procotocolo que a aplicação faz uso. Logo, por exemplo, caso seja o `udp`:
 
 ```
 $ cd class/udp
@@ -47,7 +47,8 @@ $ java udpClient
 ```
 É importante lembrar que o segundo passo, o nome do executável tem que corresponder ao protocolo usado no primeiro passo.
 
-Caso queira voltar para a pasta principal, basta:
+
+Caso queira voltar para a pasta principal basta:
 
 ```
 $ cd
