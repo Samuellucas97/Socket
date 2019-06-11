@@ -1,23 +1,41 @@
-#!/usr/bin/env python3
+# Import socket module 
+import socket 
 
-import socket  # Biblioteca para sockets
 
-HOST = "127.0.0.1"  # (localhost)
-PORT_NUMBER = 65431 # Porta usada pelo socket do Servidor
-MESSAGE_SIZE = 40 # Quantidade de caracteres que uma mensagem pode transmitir  
+def Main(): 
+    # local host IP '127.0.0.1' 
+    host = socket.gethostname()
 
-with socket.socket( socket.AF_INET, socket.SOCK_STREAM ) as socketCliente:      # Criando o socket do Cliente
-    socketCliente.connect( (HOST, PORT_NUMBER) )    # Conectando socket do Cliente ao socket do Servidor
-    print("O socket do Cliente está conectado ao socket do Servidor\n") 
-    message = str.encode('')
+    # Define the port on which you want to connect 
+    port = 14343
 
-    while (message.decode() != "Sair"):
-        socketCliente.send( str.encode( input() ) )  # Enviando mensagem para o socket do Servidor
-        data = socketCliente.recv(MESSAGE_SIZE) # Recebendo mensagem do socket do Servidor
-        print("Servidor disse: " + data.decode() )
+    s = socket.socket(socket.AF_INET,socket.SOCK_STREAM) 
 
-        if not data or data.decode() == "tchau":
+    # connect to server on local computer 
+    s.connect((host,port)) 
+
+    # message you send to server 
+    message = "shaurya says geeksforgeeks"
+    while True: 
+
+        # message sent to server 
+        s.send(message.encode('ascii')) 
+
+        # messaga received from server 
+        data = s.recv(1024) 
+
+        # print the received message 
+        # here it would be a reverse of sent message 
+        print('Received from the server :',str(data.decode('ascii'))) 
+
+        # ask the client whether he wants to continue 
+        ans = input('\nDo you want to continue(y/n) :') 
+        if ans == 'y': 
+            continue
+        else: 
             break
+    # close the connection 
+    s.close() 
 
-    socketCliente.close()
-            
+if __name__ == '__main__': 
+Main() 

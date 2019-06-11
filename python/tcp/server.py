@@ -1,32 +1,66 @@
-#!/usr/bin/env python3
-from datetime import datetime   # Necessario para pegar a hora do sistema 
-import socket                   # Biblioteca para sockets
+# import socket programming library 
+import socket 
 
-HOST = "127.0.0.1"  # (localhost)
-PORT_NUMBER = 65431  # Porta usada pelo socket do Servidor
-MESSAGE_SIZE = 40 # Quantidade de caracteres que uma mensagem pode transmitir  
+# import thread module 
+from _thread import *
+import threading 
+
+#print_lock = threading.Lock()                                                     ## CASO DESEJE MULTIPLOS CLIENTE, COMENTE ESTA LINHA
+
+# thread fuction 
+def threaded(c, addr): 
+    while True: 
+
+        # data received from client 
+        data = c.recv(1024) 
+        print( "Client (" + str(addr) + ")ask:" + data.decode() )
+
+        if not data: 
+            print( "Client (" + str(addr) + ") disconnect")
+            break
+            # lock released on exit 
+ #           print_lock.release()                                            ## CASO DESEJE MULTIPLOS CLIENTE, COMENTE ESTA LINHA 
+            
+
+        # reverse the given string from client 
+        data = data[::-1] 
+
+        # send back reversed string to client 
+        c.send(data) 
+
+    # connection closed 
+    c.close() 
 
 
-with socket.socket( socket.AF_INET, socket.SOCK_STREAM ) as socketServidor:      # Criando o socket do Servidor
+def Main(): 
+    host = "" 
 
-    socketServidor.bind( ( HOST, PORT_NUMBER ) )     # Ligando o socket do Servidor a porta PORT_NUMBER
-    print( "Ligacao entre socket Servidor e porta " +  str(PORT_NUMBER) + " executada com sucesso...\n")
-    socketServidor.listen( )     # Colocando o socket do Servidor para escutar as requisições  
-    print( "O socket do Servidor está escutando com sucesso...\n")
-    conn, addr = socketServidor.accept()      # Retirando da fila de requisições uma requisição
+    # reverse a port on your computer 
+    # in our case it is 12345 but it 
+    # can be anything 
+    port = 14343
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM) 
+    s.bind((host, port)) 
+    print("socket binded to post", port) 
 
-    with conn:
-        print( "Connected by " + str(addr) + "\n")
-        while True:
-            now = datetime.now()
-            data = conn.recv(MESSAGE_SIZE)  # Recebendo mensagem do socket do Cliente
-            print("Cliente disse:" + data.decode() + "\n")
+    # put the socket into listening mode 
+    s.listen(5) 
+    print("socket is listening") 
 
-            if not data or data.decode() == "tchau":
-                conn.send( str.encode( "tchau" ) )
-                break
+    # a forever loop until client wants to exit 
+    while True: 
 
-            backMassage = ('Mensagem "' + data.decode() + '" recebida as ' + now.strftime("%H:%M:%S") )
-            conn.send( str.encode( backMassage ) ) # Enviando mensagem para socket do Cliente
+        # establish connection with client 
+        c, addr = s.accept() 
 
-        socketServidor.close()
+        # lock acquired by client 
+        #print_lock.acquire()                                                    ## CASO DESEJE MULTIPLOS CLIENTE, COMENTE ESTA LINHA
+        print('Connected to :', addr[0], ':', addr[1]) 
+
+        # Start a new thread and return its identifier 
+        start_new_thread(threaded, (c,addr ,)) 
+    s.close() 
+
+
+if __name__ == '__main__': 
+Main() 
