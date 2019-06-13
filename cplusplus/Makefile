@@ -40,7 +40,7 @@ udpClient: $(OBJ_DIR)/udp/client.o
 
 # Alvo (target) para a construcao do objeto client.o
 # Define o arquivo client.cpp como dependência.
-$(OBJ_DIR)/udp/client.o:	$(SRC_DIR)/udp/cplusplus/client.cpp
+$(OBJ_DIR)/udp/client.o:	$(SRC_DIR)/udp/client.cpp
 	$(CC) -c $(CFLAGS) -o $@ $<
 
 
@@ -55,7 +55,7 @@ udpServer: $(OBJ_DIR)/udp/server.o
 
 # Alvo (target) para a construcao do objeto server.o
 # Define o arquivo server.cpp como dependência.
-$(OBJ_DIR)/udp/server.o:	$(SRC_DIR)/udp/cplusplus/server.cpp
+$(OBJ_DIR)/udp/server.o:	$(SRC_DIR)/udp/server.cpp
 	$(CC) -c $(CFLAGS) -o $@ $<
 
 
@@ -70,7 +70,7 @@ tcpClient: $(OBJ_DIR)/tcp/client.o
 
 # Alvo (target) para a construcao do objeto client.o
 # Define o arquivo client.cpp como dependência.
-$(OBJ_DIR)/tcp/client.o:	$(SRC_DIR)/tcp/cplusplus/client.cpp
+$(OBJ_DIR)/tcp/client.o:	$(SRC_DIR)/tcp/client.cpp
 	$(CC) -c $(CFLAGS) -o $@ $<
 
 
@@ -85,7 +85,7 @@ tcpServer: $(OBJ_DIR)/tcp/server.o
 
 # Alvo (target) para a construcao do objeto tcpServer.o
 # Define o arquivo tcpServer.cpp como dependência.
-$(OBJ_DIR)/tcp/server.o:	$(SRC_DIR)/tcp/cplusplus/server.cpp
+$(OBJ_DIR)/tcp/server.o:	$(SRC_DIR)/tcp/server.cpp
 	$(CC) -c $(CFLAGS) -o $@ $<
 
 doc:

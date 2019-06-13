@@ -120,7 +120,8 @@ void* comunicandoComCliente( void *arg, struct in_addr addrCliente_sin_addr ){
 
         /// RECEBENDO MENSAGEM DO SOCKET CLIENTE
         memset(msg,0x0,MAX_MSG);
-        messageSizeReceived = recv( socketId_Client_Conexao, msg, MAX_MSG, 0 );
+        //messageSizeReceived = recv( socketId_Client_Conexao, msg, MAX_MSG, 0 );
+        send( socketId_Client_Conexao, "msgAnswer.c_str()", MAX_MSG, 0 );
 
         if( strlen(msg) > 0){  /// Situação em que o cliente mandou uma mensagem não vazia
 
@@ -141,7 +142,7 @@ void* comunicandoComCliente( void *arg, struct in_addr addrCliente_sin_addr ){
 		    msgAnswer += std::to_string(horarioLocal->tm_sec);
 		    msgAnswer += ")";
 
-		    send( socketId_Client_Conexao, msgAnswer.c_str(), MAX_MSG, 0 );
+		  //  send( socketId_Client_Conexao, msgAnswer.c_str(), MAX_MSG, 0 );
 
         }
     

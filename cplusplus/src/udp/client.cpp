@@ -3,16 +3,19 @@
  * @brief   Contém uma implementação de um socket cliente que faz uso do protocolo UDP
  */
 
+
+#include <string.h> /* memset() */
+#include <sys/time.h> /* select() */
+#include <iostream>
+#include <cstdlib>
+
+/// BIBLIOTECAS PARA SOCKETS
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <unistd.h>
-#include <string.h> /* memset() */
-#include <sys/time.h> /* select() */
-#include <iostream>
-#include <cstdlib>
 
 #define REMOTE_SERVER_PORT 1500
 #define MAX_MSG 100
@@ -28,7 +31,7 @@ int main(int argc, char *argv[]){
 	char msg[MAX_MSG];
     
     /* VERIFICA OS ARGUMENTOS PASSADOS POR LINHA DE COMANDO */
-    if(argc<3){
+    if(argc < 3){
         cout << "Uso : " << argv[0]
         << " <servidor> <mensagem1> ... <mensagemN>" << endl;
         exit(1);
@@ -36,7 +39,7 @@ int main(int argc, char *argv[]){
 
     /* OBTEM O ENDERECO IP e PESQUISA O NOME NO DNS */
     h = gethostbyname(argv[1]);
-    if(h==NULL)    {
+    if(h == NULL)    {
         cout << argv[0] << ": host desconhecido " << argv[1] << endl;
         exit(1);
     }
