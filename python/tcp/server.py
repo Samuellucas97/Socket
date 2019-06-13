@@ -8,17 +8,21 @@ import sys
 HOST = "127.0.0.1"  # (localhost)
 PORT_NUMBER = 65431  # Porta usada pelo socket do Servidor
 
+socketsClients = {} # dicionário de clientes 
+connClients = {}
 
 def start_server(): # apenas inicia o server
     server()
 
-def client_thread(connection, ip, port, clientes={},max_buffer_size = 5120): # Essa funcão vai gerenciar cada uma das threads 
+def client_thread(connection, ip, port, clientes={},max_buffer_size = 10000): # Essa funcão vai gerenciar cada uma das threads 
         is_active = True
+        
+        
 
         while is_active: 
             client_input = receive_input(connection, max_buffer_size, ip, port)
 
-            if "Q" in client_input:
+            if "Q" == client_input:
                 print("Cliente está requisitando a finalização da comunicação.")
                 connection.close()
                 print("Conexão  " + ip + ":" + port + " fechada.")
@@ -26,14 +30,18 @@ def client_thread(connection, ip, port, clientes={},max_buffer_size = 5120): # E
             else:
                 print(": {}".format(client_input)) # imprime a messagem do cliente no servidor
                 for soc in clientes:
-                    connection.sendall('-'.encode("utf8"))
+                    if soc != str(ip + ":" + port):
+                        clientes[soc].send(client_input.encode("utf8"))
+                        print(len(clientes))
 
 def receive_input(connection, max_buffer_size, ip='yyy', port='yyy'): # Faz aquilo que o nome diz, recebe input dos clientes
     client_input = connection.recv(max_buffer_size)
     client_input_size = sys.getsizeof(client_input)
-
+    
     if client_input_size > max_buffer_size:
         print("O tamnho do input passado é maior que o permitido : {}".format(client_input_size))
+
+    connection.send("ACK!".encode("utf8"))
 
     decoded_input = client_input.decode("utf8").rstrip()  # decode and strip end of line
     result = process_input(decoded_input, ip, port)
@@ -41,8 +49,9 @@ def receive_input(connection, max_buffer_size, ip='yyy', port='yyy'): # Faz aqui
     return result
 
 def process_input(input_str, ip='xxx', port='xxx'):  # função auxiliar para a função receive_input
-    # print("Processando a mensagem recebido pelo cliente")
-    return ( "[Cliente: " +  ip+ ':'+ port + " disse]:" + str(input_str).upper())
+    now = datetime.now()
+
+    return ( "["+now.strftime("%H:%M:%S")+ "][Cliente: " +  ip+ ':'+ port + " ]:" + str(input_str).upper())
     
 
 
@@ -60,7 +69,7 @@ def server():
        
         print( "O socket do Servidor está escutando com sucesso...\n")
 
-        socketsClients = {} # dicionário de clientes 
+        
         
         online = True
 
@@ -73,7 +82,9 @@ def server():
 
             try:
                 if key_socket not in socketsClients: # Aqui coloco no dicionario cada uma das threads
-                    socketsClients[key_socket] =  Thread(target=client_thread, args=(connection, ip, port, socketsClients))
+                    connClients[key_socket] =  connection
+                    socketsClients[key_socket] = Thread(target=client_thread, args=(connection, ip, port, connClients))
+                    
 
             except:
                 print("A thread para ."  + ip + ":" + port + " não iniciou.")
@@ -82,5 +93,6 @@ def server():
             socketsClients[key_socket].start() # inicia a thread da exercução corrente
 
         socketServidor.close()
+
 
 start_server()
