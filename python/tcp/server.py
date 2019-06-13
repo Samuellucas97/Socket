@@ -7,12 +7,12 @@ import sys
 
 HOST = "127.0.0.1"  # (localhost)
 PORT_NUMBER = 65431  # Porta usada pelo socket do Servidor
-MESSAGE_SIZE = 40 # Quantidade de caracteres que uma mensagem pode transmitir  
 
-def start_server():
+
+def start_server(): # apenas inicia o server
     server()
 
-def client_thread(connection, ip, port, max_buffer_size = 5120): # Essa funcão vai gerenciar cada uma das threads 
+def client_thread(connection, ip, port, clientes={},max_buffer_size = 5120): # Essa funcão vai gerenciar cada uma das threads 
         is_active = True
 
         while is_active: 
@@ -24,10 +24,11 @@ def client_thread(connection, ip, port, max_buffer_size = 5120): # Essa funcão 
                 print("Conexão  " + ip + ":" + port + " fechada.")
                 is_active = False
             else:
-                print(": {}".format(client_input))
-                connection.sendall("-".encode("utf8"))
+                print(": {}".format(client_input)) # imprime a messagem do cliente no servidor
+                for soc in clientes:
+                    connection.sendall('-'.encode("utf8"))
 
-def receive_input(connection, max_buffer_size, ip='yyy', port='yyy'):
+def receive_input(connection, max_buffer_size, ip='yyy', port='yyy'): # Faz aquilo que o nome diz, recebe input dos clientes
     client_input = connection.recv(max_buffer_size)
     client_input_size = sys.getsizeof(client_input)
 
@@ -39,9 +40,10 @@ def receive_input(connection, max_buffer_size, ip='yyy', port='yyy'):
 
     return result
 
-def process_input(input_str, ip='xxx', port='xxx'):
+def process_input(input_str, ip='xxx', port='xxx'):  # função auxiliar para a função receive_input
     # print("Processando a mensagem recebido pelo cliente")
     return ( "[Cliente: " +  ip+ ':'+ port + " disse]:" + str(input_str).upper())
+    
 
 
 def server():
@@ -60,23 +62,24 @@ def server():
 
         socketsClients = {} # dicionário de clientes 
         
-        while (True):
+        online = True
+
+        while (online):
             connection, address = socketServidor.accept()      # Retirando da fila de requisições uma requisição
             ip, port = str(address[0]), str(address[1])
             key_socket = str(ip+':'+port) # chave usando no dicinario para endentificar cada um dos clientes
 
-            print("Conectado com  " + ip + ":" + port)
+            print("----- Conectado com  " + ip + ":" + port + " ------")
 
             try:
-                if key_socket not in socketsClients:
-                    socketsClients[key_socket] =  Thread(target=client_thread, args=(connection, ip, port)).start()
+                if key_socket not in socketsClients: # Aqui coloco no dicionario cada uma das threads
+                    socketsClients[key_socket] =  Thread(target=client_thread, args=(connection, ip, port, socketsClients))
 
             except:
                 print("A thread para ."  + ip + ":" + port + " não iniciou.")
-            traceback.print_exc()
+                traceback.print_exc()
 
-            
-
+            socketsClients[key_socket].start() # inicia a thread da exercução corrente
 
         socketServidor.close()
 
