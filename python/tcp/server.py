@@ -1,66 +1,73 @@
-# import socket programming library 
-import socket 
+#!/usr/bin/env python3
+from datetime import datetime   # Necessario para pegar a hora do sistema 
+import socket                   # Biblioteca para sockets
+import traceback
+from threading import Thread
+import sys
 
-# import thread module 
-from _thread import *
-import threading 
+HOST = "127.0.0.1"  # (localhost)
+PORT_NUMBER = 65431  # Porta usada pelo socket do Servidor
+MESSAGE_SIZE = 40 # Quantidade de caracteres que uma mensagem pode transmitir  
 
-#print_lock = threading.Lock()                                                     ## CASO DESEJE MULTIPLOS CLIENTE, COMENTE ESTA LINHA
+def start_server():
+    server()
 
-# thread fuction 
-def threaded(c, addr): 
-    while True: 
+def client_thread(connection, ip, port, max_buffer_size = 5120): # Essa funcão vai gerenciar cada uma das threads 
+        is_active = True
 
-        # data received from client 
-        data = c.recv(1024) 
-        print( "Client (" + str(addr) + ")ask:" + data.decode() )
+        while is_active: 
+            client_input = receive_input(connection, max_buffer_size)
 
-        if not data: 
-            print( "Client (" + str(addr) + ") disconnect")
-            break
-            # lock released on exit 
- #           print_lock.release()                                            ## CASO DESEJE MULTIPLOS CLIENTE, COMENTE ESTA LINHA 
-            
+            if "Q" in client_input:
+                print("Cliente está requisitando a finalização da comunicação.")
+                connection.close()
+                print("Conexão  " + ip + ":" + port + " fechada.")
+                is_active = False
+            else:
+                print(": {}".format(client_input))
+                connection.sendall("-".encode("utf8"))
 
-        # reverse the given string from client 
-        data = data[::-1] 
+def receive_input(connection, max_buffer_size):
+    client_input = connection.recv(max_buffer_size)
+    client_input_size = sys.getsizeof(client_input)
 
-        # send back reversed string to client 
-        c.send(data) 
+    if client_input_size > max_buffer_size:
+        print("O tamnho do input passado é maior que o permitido : {}".format(client_input_size))
 
-    # connection closed 
-    c.close() 
+    decoded_input = client_input.decode("utf8").rstrip()  # decode and strip end of line
+    result = process_input(decoded_input)
 
+    return result
 
-def Main(): 
-    host = "" 
-
-    # reverse a port on your computer 
-    # in our case it is 12345 but it 
-    # can be anything 
-    port = 14343
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM) 
-    s.bind((host, port)) 
-    print("socket binded to post", port) 
-
-    # put the socket into listening mode 
-    s.listen(5) 
-    print("socket is listening") 
-
-    # a forever loop until client wants to exit 
-    while True: 
-
-        # establish connection with client 
-        c, addr = s.accept() 
-
-        # lock acquired by client 
-        #print_lock.acquire()                                                    ## CASO DESEJE MULTIPLOS CLIENTE, COMENTE ESTA LINHA
-        print('Connected to :', addr[0], ':', addr[1]) 
-
-        # Start a new thread and return its identifier 
-        start_new_thread(threaded, (c,addr ,)) 
-    s.close() 
+def process_input(input_str, ip='', port=''):
+    print("Processando a mensagem recebido pelo cliente...")
+    return ( str(input_str).upper())
 
 
-if __name__ == '__main__': 
-Main() 
+def server():
+    with socket.socket( socket.AF_INET, socket.SOCK_STREAM ) as socketServidor:      # Criando o socket do Servidor
+        socketServidor.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    
+        try:
+            socketServidor.bind( ( HOST, PORT_NUMBER ) )     # Ligando o socket do Servidor a porta PORT_NUMBER 
+        except:
+            print("Bind falhou,erro ao criar o vinculo. Erro: " + str(sys.exc_info())) 
+            sys.exit()
+
+        socketServidor.listen( )     # Colocando o socket do Servidor para escutar as requisições  
+       
+        print( "O socket do Servidor está escutando com sucesso...\n")
+        while (True):
+            connection, address = socketServidor.accept()      # Retirando da fila de requisições uma requisição
+            ip, port = str(address[0]), str(address[1])
+            print("Conectado com  " + ip + ":" + port)
+
+            try:
+                Thread(target=client_thread, args=(connection, ip, port)).start()
+            except:
+                print("A thread para ."  + ip + ":" + port + " não iniciou.")
+            traceback.print_exc()
+
+        socketServidor.close()
+
+start_server()
