@@ -71,27 +71,27 @@ int main(int argc, char *argv[]){
         /* IMPRIME A MENSAGEM RECEBIDA */
         cout << argv[0] << ": de " << inet_ntoa(cliAddr.sin_addr) << ":UDP(" << ntohs(cliAddr.sin_port) << ") : " << msg << endl;
 	
-	/* RESPONDENDO O CLIENTE */
-	msgAnswer = "";
-	msgAnswer += "Mensagem ";
-	msgAnswer += msg;
-	msgAnswer += " recebida as 99h99 (";
-	
-	time( &timer);
-	horarioLocal = localtime( &timer);	
-	
-	msgAnswer += to_string(horarioLocal->tm_hour);
-	msgAnswer += ":";
-    	msgAnswer += to_string(horarioLocal->tm_min);
-	msgAnswer += ":";
-    	msgAnswer += to_string(horarioLocal->tm_sec);
-	msgAnswer += ")";
-	
-	sendto(sd, msgAnswer.c_str(), MAX_MSG, 0, (struct sockaddr *) &cliAddr, cliLen );
+    	/* RESPONDENDO O CLIENTE */
+    	msgAnswer = "";
+    	msgAnswer += "Mensagem ";
+    	msgAnswer += msg;
+    	msgAnswer += " recebida as 99h99 (";
+    	
+    	time( &timer);
+    	horarioLocal = localtime( &timer);	
+    	
+    	msgAnswer += to_string(horarioLocal->tm_hour);
+    	msgAnswer += ":";
+        	msgAnswer += to_string(horarioLocal->tm_min);
+    	msgAnswer += ":";
+        	msgAnswer += to_string(horarioLocal->tm_sec);
+    	msgAnswer += ")";
+    	
+    	sendto(sd, msgAnswer.c_str(), MAX_MSG, 0, (struct sockaddr *) &cliAddr, cliLen );
 
-	if( string( msg) == "tchau" ){
-		break;
-	}  
+    	if( string( msg) == "tchau" ){
+    		break;
+    	}  
 
     }/* FIM DO LOOP INFINITO */
 

@@ -8,6 +8,7 @@
 #include <cstring>
 #include <cstdio>
 #include <thread>
+#include <chrono>
 
 /// BIBLIOTECAS PARA SOCKETS
 
@@ -16,7 +17,7 @@
 #include <unistd.h>
 #include <netdb.h> /// struct hostent*
 
-#define REMOTE_SERVER_PORT 4504
+#define REMOTE_SERVER_PORT 4500
 #define MAX_MSG 100 /// Quantidade de caracteres que uma mensagem pode transmitir  
 
 void escutarServidor( void *arg, struct in_addr addrCliente_sin_addr);
@@ -29,14 +30,14 @@ int main(int argc, char *argv[]){
     struct hostent *h;
 
     /* VERIFICA OS ARGUMENTOS PASSADOS POR LINHA DE COMANDO */
-    if(argc < 2){
+    if(argc < 3){
         std::cout << "Uso : " << argv[0]
-        << " <IP do servidor>" << std::endl;
+        << " <nome do cliente> <IP do servidor>" << std::endl;
         exit(1);
     }
 
     /* OBTEM O ENDERECO IP e PESQUISA O NOME NO DNS */
-    h = gethostbyname(argv[1]);
+    h = gethostbyname(argv[2]);
     if(h == NULL)    {
         std::cout << argv[0] << ": host desconhecido " << argv[1] << std::endl;
         exit(1);
@@ -74,38 +75,26 @@ int main(int argc, char *argv[]){
         std::cout << "Cliente conectado ao Servidor (via sockets)..." << std::endl << std::endl;
     }
 
+    send( socketId_Cliente, argv[1], MAX_MSG, 0 );
+
 
     /// CLIENTE PASSA A OUVIR SEMPRE O SERVIDOR
     std::thread th (escutarServidor, &socketId_Cliente, addrServer.sin_addr );                    
-    th.join();
+    th.detach();
 
-    // /// SOCKET DO CLIENTE **COMUNICANDO-SE** COM O SOCKET DO SERVIDOR
-    // while( true ){
 
-    //     memset(bufferServer,0x0,MAX_MSG);
-    //     std::cin.getline(bufferServer, MAX_MSG);
+    /// SOCKET DO CLIENTE **COMUNICANDO-SE** COM O SOCKET DO SERVIDOR
+    while( true ){
+
+        memset(bufferServer,0x0,MAX_MSG);
+        std::cin.getline(bufferServer, MAX_MSG);
         
-    //     send( socketId_Cliente, bufferServer, MAX_MSG, 0 );
-    //     messageSizeReceived = recv(socketId_Cliente, bufferServer, MAX_MSG, 0);
+        send( socketId_Cliente, bufferServer, MAX_MSG, 0 );
+    }
 
-    //     if( messageSizeReceived > 0 ){  /// Situação em que o cliente mandou uma mensagem não vazia
-            
-    //         std::cout << "Servidor disse: " << bufferServer << std::endl;
-            
-    //         /// QUEBRANDO A CONEXÃO COM O SOCKET SERVIDOR
-    //         if( std::string(bufferServer) == "tchau" ||
-    //             std::string(bufferServer) == "bye" ||
-    //             std::string(bufferServer) == "Ate logo"){
-    //                 break;
-    //             }
-    //     }
 
-    // }
+    std::cout << "Conexao entre os sockets do Cliente e do Servidor foi quebrada..." << std::endl;
 
-    // //// QUEBRANDO CONEXÃO ENTRE O SOCKET DO CLIENTE E O DO SERVIDOR
-    // close( socketId_Cliente );
-    
-    // std::cout << "Conexao entre os sockets do Cliente e do Servidor foi quebrada..." << std::endl;
     
     return EXIT_SUCCESS;
 
@@ -120,19 +109,12 @@ void escutarServidor( void *arg, struct in_addr addrServidor_sin_addr){
 
     /// SOCKET DO SERVIDOR **COMUNICANDO-SE** COM O SOCKET DO CLIENTE
     while (true){
-
         /// RECEBENDO MENSAGEM DO SOCKET SERVIDOR
         memset(msg,0x0,MAX_MSG);
-        std::cout << "OI\n";
 
         messageSizeReceived = recv( socketId_Servidor_Conexao, msg, MAX_MSG, 0 );
 
-        if( strlen(msg) > 0){  /// Situação em que o cliente mandou uma mensagem não vazia
-
-            std::cout << "\nServidor (IP: " << inet_ntoa(addrServidor_sin_addr)  << ") disse: " << msg << "\n";
-
-        }
-    
+        std::cout << "\nServidor (IP: " << inet_ntoa(addrServidor_sin_addr)  << ") disse: " << msg << "\n";
     }
 
     close(socketId_Servidor_Conexao);
