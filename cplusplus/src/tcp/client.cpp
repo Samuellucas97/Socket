@@ -89,12 +89,17 @@ int main(int argc, char *argv[]){
         memset(bufferServer,0x0,MAX_MSG);
         std::cin.getline(bufferServer, MAX_MSG);
         
+        if( std::string(bufferServer) == "sair"){
+            send( socketId_Cliente, "sair", MAX_MSG, 0 );
+            break;    
+        }        
+
         send( socketId_Cliente, bufferServer, MAX_MSG, 0 );
     }
 
 
     std::cout << "Conexao entre os sockets do Cliente e do Servidor foi quebrada..." << std::endl;
-
+    close(socketId_Cliente);
     
     return EXIT_SUCCESS;
 
@@ -117,5 +122,4 @@ void escutarServidor( void *arg, struct in_addr addrServidor_sin_addr){
         // std::cout << "\nServidor (IP: " << inet_ntoa(addrServidor_sin_addr)  << ") disse: " << msg << "\n";
     }
 
-    close(socketId_Servidor_Conexao);
 }

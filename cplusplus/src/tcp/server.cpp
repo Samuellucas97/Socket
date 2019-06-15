@@ -143,8 +143,17 @@ void comunicandoComCliente( void* arg, struct in_addr addrCliente_sin_addr ){
     }
 
     for(std::map<std::string, int>::iterator it = conexoesServidorEClientes.begin(); it != conexoesServidorEClientes.end(); ++it){
-        if( it->second != socketId_Client_Conexao)               
+        if( it->second != socketId_Client_Conexao){               
             send(  it->second, (nomeDoCliente + " se conectou").c_str(), MAX_MSG, 0 );
+        }
+        else{
+            for(std::map<std::string, int>::iterator it_2 = conexoesServidorEClientes.begin(); it_2 != conexoesServidorEClientes.end(); ++it_2){
+                if( it_2->first != nomeDoCliente){               
+                     send(  socketId_Client_Conexao, (it_2->first + " estah conectado").c_str(), MAX_MSG, 0 );
+                }
+            } 
+        }
+
     }
 
     /// SOCKET DO SERVIDOR **COMUNICANDO-SE** COM O SOCKET DO CLIENTE
@@ -159,38 +168,55 @@ void comunicandoComCliente( void* arg, struct in_addr addrCliente_sin_addr ){
 
             std::cout << "\nCliente (IP: " << inet_ntoa(addrCliente_sin_addr)  << ") disse: " << msg << "\n";
 
-            /// ENVIANDO MENSAGEM PARA O SOCKET CLIENTE
-            time( &timer);
-            horarioLocal = localtime( &timer);  
+            if( std::string(msg) != "sair"){
 
-            msgAnswer = "";
-            msgAnswer += nomeDoCliente;
-            msgAnswer +=" disse:";
-            msgAnswer += msg;
-            msgAnswer += "  [ Mensagem recebida as 99h99 (";
-            msgAnswer += std::to_string(horarioLocal->tm_hour);
-            msgAnswer += ":";
-            msgAnswer += std::to_string(horarioLocal->tm_min);
-            msgAnswer += ":";
-            msgAnswer += std::to_string(horarioLocal->tm_sec);
-            msgAnswer += ") ]";
+                /// ENVIANDO MENSAGEM PARA O SOCKET CLIENTE
+                time( &timer);
+                horarioLocal = localtime( &timer);  
 
-        //   //  send( socketId_Client_Conexao, msgAnswer.c_str(), MAX_MSG, 0 );
+                msgAnswer = "";
+                msgAnswer += nomeDoCliente;
+                msgAnswer +=" disse:";
+                msgAnswer += msg;
+                msgAnswer += "  [ Mensagem recebida as (";
+                msgAnswer += std::to_string(horarioLocal->tm_hour);
+                msgAnswer += ":";
+                msgAnswer += std::to_string(horarioLocal->tm_min);
+                msgAnswer += ":";
+                msgAnswer += std::to_string(horarioLocal->tm_sec);
+                msgAnswer += ") ]";
 
-            // send(  socketId_Client_Conexao, "BROADCAST...", MAX_MSG, 0 );
-            // std::cout << "Enviando para destino\n";
-            
-            // std::this_thread::sleep_for (std::chrono::seconds(3));    
-            
-            for(std::map<std::string, int>::iterator it = conexoesServidorEClientes.begin(); it != conexoesServidorEClientes.end(); ++it){
-                // std::cout << "Enviando para outros\n";
-                // std::cout << it->first << " " << inet_ntoa(addrCliente_sin_addr) << "  " <<  it->second << std::endl;
+                std::string msgAnswerACK = "";
+                for(std::map<std::string, int>::iterator it = conexoesServidorEClientes.begin(); it != conexoesServidorEClientes.end(); ++it){
 
-                if( it->second != socketId_Client_Conexao)               
-                    send(  it->second, msgAnswer.c_str(), MAX_MSG, 0 );
-                else
-                    send(  it->second, "ACK", MAX_MSG, 0 );
-            }
+                    if( it->second != socketId_Client_Conexao){               
+                        send(  it->second, msgAnswer.c_str(), MAX_MSG, 0 );
+                    }else{
+
+                        msgAnswerACK = "";
+                        msgAnswerACK += "Mensagem ";
+                        msgAnswerACK += msg;
+                        msgAnswerACK += " recebida as (";
+                        msgAnswerACK += std::to_string(horarioLocal->tm_hour);
+                        msgAnswerACK += ":";
+                        msgAnswerACK += std::to_string(horarioLocal->tm_min);
+                        msgAnswerACK += ":";
+                        msgAnswerACK += std::to_string(horarioLocal->tm_sec);
+                        msgAnswerACK += ")";    
+
+                        send(  socketId_Client_Conexao, msgAnswerACK.c_str(), MAX_MSG, 0 );
+                    }
+                }
+
+            }else{
+                conexoesServidorEClientes.erase(nomeDoCliente);
+
+                for(std::map<std::string, int>::iterator it = conexoesServidorEClientes.begin(); it != conexoesServidorEClientes.end(); ++it){
+                    send(  it->second, (nomeDoCliente + " desconectou").c_str(), MAX_MSG, 0 );
+                }
+
+            }    
+
         }    
     
     }
