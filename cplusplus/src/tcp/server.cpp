@@ -129,12 +129,23 @@ int main(int argc, char* argv[]){
 void comunicandoComCliente( void* arg, struct in_addr addrCliente_sin_addr ){
     
     int socketId_Client_Conexao = *((int *) arg);
-
     char msg[MAX_MSG] = ""; //-> Buffer que guardara a mensagem recebida e a que sera enviada
     int messageSizeReceived; //-> Tamanho da mensagem recebida
     std::string msgAnswer; //-> Resposta do Servidor entrada pelo usuario
     time_t timer;
     struct tm *horarioLocal; 
+
+    std::string nomeDoCliente = "";
+    
+    for(std::map<std::string, int>::iterator it = conexoesServidorEClientes.begin(); it != conexoesServidorEClientes.end(); ++it){
+        if( it->second == socketId_Client_Conexao)               
+            nomeDoCliente = it->first;
+    }
+
+    for(std::map<std::string, int>::iterator it = conexoesServidorEClientes.begin(); it != conexoesServidorEClientes.end(); ++it){
+        if( it->second != socketId_Client_Conexao)               
+            send(  it->second, (nomeDoCliente + " se conectou").c_str(), MAX_MSG, 0 );
+    }
 
     /// SOCKET DO SERVIDOR **COMUNICANDO-SE** COM O SOCKET DO CLIENTE
     while (true){
@@ -153,22 +164,23 @@ void comunicandoComCliente( void* arg, struct in_addr addrCliente_sin_addr ){
             horarioLocal = localtime( &timer);  
 
             msgAnswer = "";
-            msgAnswer += "Mensagem ";
+            msgAnswer += nomeDoCliente;
+            msgAnswer +=" disse:";
             msgAnswer += msg;
-            msgAnswer += " recebida as 99h99 (";
+            msgAnswer += "  [ Mensagem recebida as 99h99 (";
             msgAnswer += std::to_string(horarioLocal->tm_hour);
             msgAnswer += ":";
             msgAnswer += std::to_string(horarioLocal->tm_min);
             msgAnswer += ":";
             msgAnswer += std::to_string(horarioLocal->tm_sec);
-            msgAnswer += ")";
+            msgAnswer += ") ]";
 
         //   //  send( socketId_Client_Conexao, msgAnswer.c_str(), MAX_MSG, 0 );
 
             // send(  socketId_Client_Conexao, "BROADCAST...", MAX_MSG, 0 );
             // std::cout << "Enviando para destino\n";
             
-            std::this_thread::sleep_for (std::chrono::seconds(3));    
+            // std::this_thread::sleep_for (std::chrono::seconds(3));    
             
             for(std::map<std::string, int>::iterator it = conexoesServidorEClientes.begin(); it != conexoesServidorEClientes.end(); ++it){
                 // std::cout << "Enviando para outros\n";
@@ -183,6 +195,7 @@ void comunicandoComCliente( void* arg, struct in_addr addrCliente_sin_addr ){
     
     }
 
+    
     close(socketId_Client_Conexao);
     
 }

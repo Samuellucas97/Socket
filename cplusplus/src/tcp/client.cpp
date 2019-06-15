@@ -113,8 +113,8 @@ void escutarServidor( void *arg, struct in_addr addrServidor_sin_addr){
         memset(msg,0x0,MAX_MSG);
 
         messageSizeReceived = recv( socketId_Servidor_Conexao, msg, MAX_MSG, 0 );
-
-        std::cout << "\nServidor (IP: " << inet_ntoa(addrServidor_sin_addr)  << ") disse: " << msg << "\n";
+        std::cout << msg << std::endl;
+        // std::cout << "\nServidor (IP: " << inet_ntoa(addrServidor_sin_addr)  << ") disse: " << msg << "\n";
     }
 
     close(socketId_Servidor_Conexao);
