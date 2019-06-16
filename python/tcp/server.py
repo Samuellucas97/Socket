@@ -10,6 +10,7 @@ PORT_NUMBER = 65431  # Porta usada pelo socket do Servidor
 
 socketsClients = {} # dicionário de clientes 
 connClients = {}
+now = datetime.now()
 
 def start_server(): # apenas inicia o server
     server()
@@ -41,7 +42,7 @@ def receive_input(connection, max_buffer_size, ip='yyy', port='yyy'): # Faz aqui
     if client_input_size > max_buffer_size:
         print("O tamnho do input passado é maior que o permitido : {}".format(client_input_size))
 
-    connection.send("ACK!".encode("utf8"))
+    connection.send(("Mensagem  recebida às " +now.strftime("%H:%M:%S")).encode("utf8"))
 
     decoded_input = client_input.decode("utf8").rstrip()  # decode and strip end of line
     result = process_input(decoded_input, ip, port)
@@ -49,7 +50,7 @@ def receive_input(connection, max_buffer_size, ip='yyy', port='yyy'): # Faz aqui
     return result
 
 def process_input(input_str, ip='xxx', port='xxx'):  # função auxiliar para a função receive_input
-    now = datetime.now()
+    
 
     return ( "["+now.strftime("%H:%M:%S")+ "][Cliente: " +  ip+ ':'+ port + " ]:" + str(input_str).upper())
     
