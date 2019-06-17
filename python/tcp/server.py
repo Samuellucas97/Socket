@@ -18,8 +18,6 @@ def start_server(): # apenas inicia o server
 def client_thread(connection, ip, port, clientes={},max_buffer_size = 10000): # Essa funcão vai gerenciar cada uma das threads 
         is_active = True
         
-        
-
         while is_active: 
             client_input = receive_input(connection, max_buffer_size, ip, port)
 
@@ -30,10 +28,10 @@ def client_thread(connection, ip, port, clientes={},max_buffer_size = 10000): # 
                 is_active = False
             else:
                 print(": {}".format(client_input)) # imprime a messagem do cliente no servidor
-                for soc in clientes:
+                for soc in clientes: # broadcast para os clientes
                     if soc != str(ip + ":" + port):
-                        clientes[soc].send(client_input.encode("utf8"))
-                        print(len(clientes))
+                        clientes[soc].send((": {}".format(client_input)  ).encode("utf8"))
+                
 
 def receive_input(connection, max_buffer_size, ip='yyy', port='yyy'): # Faz aquilo que o nome diz, recebe input dos clientes
     client_input = connection.recv(max_buffer_size)
@@ -50,9 +48,7 @@ def receive_input(connection, max_buffer_size, ip='yyy', port='yyy'): # Faz aqui
     return result
 
 def process_input(input_str, ip='xxx', port='xxx'):  # função auxiliar para a função receive_input
-    
-
-    return ( "["+now.strftime("%H:%M:%S")+ "][Cliente: " +  ip+ ':'+ port + " ]:" + str(input_str).upper())
+    return ( "["+now.strftime("%H:%M:%S")+ "][Cliente: " +  ip+ ':'+ port + " ]:" + str(input_str))
     
 
 
