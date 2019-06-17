@@ -1,0 +1,30 @@
+Empresa: Teobaldo Serviços Gráficos
+
+Necessidades:
+	* Website com lista de produtos(banner, plotagens, etc);
+	* FTP tradicional e seguro para troca de arquivos com seus clientes;
+	* Servidor de correio eletrônico próprio com utilização de Webmail;
+	* Acesso remoto apenas para usuários administradores da empresa.
+
+Tarefa:
+	* Apresente um projeto de solução de servidores/serviços de rede para a empresa;
+	* A solução deve ser composta dos seguintes elementos:
+		- Servidor DNS
+			+ Protocolo: DNS; (teobaldo.net)
+			+ Aplicações: Bind9, nslookup, dig.
+		- Servidor Web
+			+ Protocolo: HTTP e SSL;
+			+ Aplicações: Apache e OpenSSL;
+		- Servidor de Correio Eletrônico
+			+ Protocolo: SMTP, POP, IMAP;
+			+ Aplicações: Postfix, qualquer Webmail;
+		- Servidor FTP:
+			+ Protocolo: FTP;
+			+ Aplicações: VsFTP;
+		- Servidor SSH:
+			+ Protocolo: SSH;
+			+ Aplicações: OpenSSH;
+
+Entrega:
+	* Relatório (PDF): com a proposta de solução incluindo: descrição do funcionamento de cada protocolo envolvido, configuração e utilização do ambiente (utilizar máquina virtual);
+	* Equipes de 3 componentes;
