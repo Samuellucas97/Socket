@@ -1,8 +1,8 @@
 /**
- * @file    serverSide.cpp
- * @brief   Implementação de arquitetura cliente-servidor (TCP) no lado do servidor
+ * @file    server.cpp
+ * @brief   Contém uma implementação de um socket servidor que faz uso do protocolo TCP que suporta múltiplos clientes
  */
-#include <vector>
+
 #include <iostream>
 #include <string>
 #include <cstring>
@@ -19,29 +19,24 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
-#define LOCAL_SERVER_PORT 4500    /// Numero da porta usada pelo socket do Servidor
-#define QUEUE_SIZE_OF_REQUISITIONS 10   /// Tamanho da lista de requisicoes
+#define LOCAL_SERVER_PORT 4500    /// Número da porta usada pelo socket do Servidor
+#define QUEUE_SIZE_OF_REQUISITIONS 10   /// Tamanho da lista de requisições
 #define MAX_MSG 100 /// Quantidade de caracteres que uma mensagem pode transmitir  
-
 
 std::map<std::string, int> conexoesServidorEClientes;
 
 /**
  * @brief   Ocorre a comunicacao entre o servidor e o cliente
- * @param   socketId_Client_Conexao 
+ * @param   arg Conexão entre cliente e servidor
+ * @param   socketId_Client_Conexao     Endereço de 
  */
 void comunicandoComCliente( void* arg, struct in_addr addrCliente_sin_addr);
    
 int main(int argc, char* argv[]){
 
-
-    std::vector<std::thread> threads;
-
-
     int socketId_Client_Conexao; //-> Indica se houve falha ou nao na retirada da requisicao da fila de requisicoes
     struct sockaddr_in addrCliente;
     char msg[MAX_MSG] = "";
-    int messageSizeReceived;   
     
     /// CONFIGURANDO PROPRIEDADES DE CONEXÃO
     struct sockaddr_in addrServer;
@@ -80,6 +75,7 @@ int main(int argc, char* argv[]){
         std::cout << "O socket do Servidor esta ouvindo se ha requisicoes..." << std::endl;
     }
     
+    /** LOOP INFINITO PARA CRIAÇÃO DE CONEXÕES */
     while(true){
 
         /* 4. RETIRANDO REQUISIÇÃO PENDENTE DA CABEÇA DA FILA DE REQUISIÇÕES */
@@ -96,27 +92,22 @@ int main(int argc, char* argv[]){
         std::cout << "Requisicao retirada da frente da fila de requisicoes com sucesso" << std::endl;
 
         /** 5. RECEBENDO NOME DO CLIENTE */
-        messageSizeReceived = recv( socketId_Client_Conexao, msg, MAX_MSG, 0 );
+        recv( socketId_Client_Conexao, msg, MAX_MSG, 0 );
 
 
-        /* 6. ADICIONANDO A CONEXAO ESTABELECIDA AO MAP DE CONEXOES */
+        /* 6. ADICIONANDO A CONEXÃO ESTABELECIDA AO MAP DE CONEXOES */
         conexoesServidorEClientes[msg] = (int)socketId_Client_Conexao;
 
         std::cout << "Requisicao retirada da frente da fila de requisicoes com sucesso" << std::endl;
 
-        /* 7. ADICIONANDO COMUNICACAO COM SER */
+        /* 7. ADICIONANDO COMUNICAÇÃO COM SER */
         std::thread th (comunicandoComCliente, &socketId_Client_Conexao, addrCliente.sin_addr);                    
         th.detach();
-       
 
+    }/* FIM DO LOOP INFINITO */
 
-    }
-
-    //// QUEBRANDO CONEXÃO ENTRE O SOCKET DO SERVIDOR E O DO CLIENTE
-
-
+    /* 8. QUEBRANDO CONEXÃO ENTRE O SOCKET DO SERVIDOR E O DO CLIENTE */
     close(socketId_Server);
-
     std::cout << "Conexao entre os sockets do Servidor e do Cliente foi quebrada..." << std::endl;
     
     return EXIT_SUCCESS;
@@ -124,24 +115,27 @@ int main(int argc, char* argv[]){
 
 /**
  * @brief   Ocorre a comunicacao entre o servidor e o cliente
- * @param   socketId_Client_Conexao 
+ * @param   arg Conexão entre cliente e servidor
+ * @param   socketId_Client_Conexao     Endereço de 
  */
 void comunicandoComCliente( void* arg, struct in_addr addrCliente_sin_addr ){
     
     int socketId_Client_Conexao = *((int *) arg);
     char msg[MAX_MSG] = ""; //-> Buffer que guardara a mensagem recebida e a que sera enviada
-    int messageSizeReceived; //-> Tamanho da mensagem recebida
     std::string msgAnswer; //-> Resposta do Servidor entrada pelo usuario
     time_t timer;
     struct tm *horarioLocal; 
 
     std::string nomeDoCliente = "";
     
+    /// DESCOBRIMENTO DO NOME DO USUÁRIO
     for(std::map<std::string, int>::iterator it = conexoesServidorEClientes.begin(); it != conexoesServidorEClientes.end(); ++it){
         if( it->second == socketId_Client_Conexao)               
             nomeDoCliente = it->first;
     }
 
+    ///     AVISANDO AOS DEMAIS CLIENTES CONECTADOS QUE ESSE USUÁRIO SE CONECTOU
+    /// E AVISANDO A ESSE CLIENTE QUAIS CLIENTES ESTAO CONECTADOS
     for(std::map<std::string, int>::iterator it = conexoesServidorEClientes.begin(); it != conexoesServidorEClientes.end(); ++it){
         if( it->second != socketId_Client_Conexao){               
             send(  it->second, (nomeDoCliente + " se conectou").c_str(), MAX_MSG, 0 );
@@ -161,8 +155,7 @@ void comunicandoComCliente( void* arg, struct in_addr addrCliente_sin_addr ){
 
         /// RECEBENDO MENSAGEM DO SOCKET CLIENTE
         memset(msg,0x0,MAX_MSG);
-        messageSizeReceived = recv( socketId_Client_Conexao, msg, MAX_MSG, 0 );
-
+        recv( socketId_Client_Conexao, msg, MAX_MSG, 0 );
 
         if( strlen(msg) > 0){  /// Situação em que o cliente mandou uma mensagem não vazia
 
@@ -208,9 +201,10 @@ void comunicandoComCliente( void* arg, struct in_addr addrCliente_sin_addr ){
                     }
                 }
 
-            }else{
+            }else{  
                 conexoesServidorEClientes.erase(nomeDoCliente);
 
+                /// AVISANDO AOS DEMAIS CLIENTES QUE ESSE CLIENTE DESCONECTOU
                 for(std::map<std::string, int>::iterator it = conexoesServidorEClientes.begin(); it != conexoesServidorEClientes.end(); ++it){
                     send(  it->second, (nomeDoCliente + " desconectou").c_str(), MAX_MSG, 0 );
                 }
@@ -221,7 +215,6 @@ void comunicandoComCliente( void* arg, struct in_addr addrCliente_sin_addr ){
     
     }
 
-    
     close(socketId_Client_Conexao);
     
 }

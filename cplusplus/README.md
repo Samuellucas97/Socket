@@ -27,13 +27,18 @@ Em seguida, serão criados os seguintes arquivos binários (executáveis):
 |`tcpClient` 	|Programa que implementa socket cliente que faz uso do protocolo TCP.  
 |`tcpServer` 	|Programa que implementa socket servidor que faz uso do protocolo TCP.  
   
-Diante disso, basta executa o respectivo código de acordo como o nome do executável. Logo, por exemplo, caso seja o `udpClient`  
+Diante disso, para a execução dos executáveis teremos que no caso dos servidores, tanto TCP quanto UDP, basta executar o arquivo sem parâmetro nenhum. Por exemplo, no caso do servidor TCP, `tcpServer`, temos que:  
 
 ```
-$ ./bin/udpClient
+$ ./bin/tcpServer
 ```
-  
-Além disso, caso deseje ver a documentação desses codigos, execute  
+Em contrapartida, no caso dos clientes, haverá a necessidade de inserir alguns argumentos. Pois, será necessária que haja o endereço IP do servidor para o estabelecimento da conexão e também o cliente deverá enviar o seu nome de usuário para o servidor cadastrá-lo, no caso em que é um cliente TCP. Por isso, por exemplo, para o cliente TCP, teremos que:
+
+```
+$ ./bin/tcpClient Lucas localhost
+```
+
+Além disso, caso deseje ver a documentação desses códigos, execute  
 
 ```
 $ make doc

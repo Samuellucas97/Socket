@@ -20,23 +20,27 @@
 #define REMOTE_SERVER_PORT 4500
 #define MAX_MSG 100 /// Quantidade de caracteres que uma mensagem pode transmitir  
 
+/**
+ * @brief   Escutando continuamente as mensagens do servidor
+ * @param   arg Conexão do cliente com o servidor
+ * @param   addrCliente_sin_addr    Endereço IP do cliente
+ */
 void escutarServidor( void *arg, struct in_addr addrCliente_sin_addr);
 
 int main(int argc, char *argv[]){ 
 
     char bufferServer[MAX_MSG]; //-> Buffer que guardara a mensagem recebida e a que sera enviada
-    int messageSizeReceived; //-> Tamanho da mensagem recebida
     std::string clienteResponse; //-> Resposta do Cliente entrada pelo usuario
     struct hostent *h;
 
-    /* VERIFICA OS ARGUMENTOS PASSADOS POR LINHA DE COMANDO */
+    /* 1. VERIFICA OS ARGUMENTOS PASSADOS POR LINHA DE COMANDO */
     if(argc < 3){
         std::cout << "Uso : " << argv[0]
         << " <nome do cliente> <IP do servidor>" << std::endl;
         exit(1);
     }
 
-    /* OBTEM O ENDERECO IP e PESQUISA O NOME NO DNS */
+    /* 2. OBTEM O ENDERECO IP e PESQUISA O NOME NO DNS */
     h = gethostbyname(argv[2]);
     if(h == NULL)    {
         std::cout << argv[0] << ": host desconhecido " << argv[1] << std::endl;
@@ -45,7 +49,7 @@ int main(int argc, char *argv[]){
     std::cout << argv[0] << ": enviando dados para " << h->h_name
          << " (IP : " << inet_ntoa(*(struct in_addr *)h->h_addr_list[0]) << ")" << std::endl;
     
-    /// CONFIGURANDO AS PROPRIEDADES DA CONEXAO
+    /* 3. CONFIGURANDO AS PROPRIEDADES DA CONEXAO */
     struct sockaddr_in addrServer;
     
     addrServer.sin_family = h->h_addrtype;
@@ -55,7 +59,7 @@ int main(int argc, char *argv[]){
  
     std::cout << "Iniciando cliente..." << std::endl;
 
-    /// CRIANDO O SOCKET (AF_INET = IPV4) DO CLIENTE
+    /* 4. CRIANDO O SOCKET (AF_INET = IPV4) DO CLIENTE */
     int socketId_Cliente = socket(AF_INET, SOCK_STREAM, 0);
 
     if( socketId_Cliente == -1){
@@ -66,7 +70,7 @@ int main(int argc, char *argv[]){
         std::cout << "Socket do Cliente criado com sucesso" << std::endl;
     }
     
-    /// ESTABELECENDO CONEXÃO VIA SOCKETS ENTRE O **CLIENTE** E O SERVIDOR
+    /* 5. ESTABELECENDO CONEXÃO VIA SOCKETS ENTRE O **CLIENTE** E O SERVIDOR */
     if( connect( socketId_Cliente, (struct sockaddr *) &addrServer, sizeof(addrServer) ) == -1 ){
         std::cerr << "Falha ao conectar o socket do Cliente e o do Servidor..." << std::endl;
         exit(EXIT_FAILURE);
@@ -75,15 +79,14 @@ int main(int argc, char *argv[]){
         std::cout << "Cliente conectado ao Servidor (via sockets)..." << std::endl << std::endl;
     }
 
+    /* 6. ENVIANDO NOME DO CLIENTE PARA O SERVIDOR */
     send( socketId_Cliente, argv[1], MAX_MSG, 0 );
 
-
-    /// CLIENTE PASSA A OUVIR SEMPRE O SERVIDOR
+    /* 7. CRIAÇÃO DA THREAD DO CLIENTE QUE FAZ COM QUE ELE SEMPRE ESCUTE O SERVIDOR */
     std::thread th (escutarServidor, &socketId_Cliente, addrServer.sin_addr );                    
     th.detach();
 
-
-    /// SOCKET DO CLIENTE **COMUNICANDO-SE** COM O SOCKET DO SERVIDOR
+    /* 8. LENDO MENSAGEM ENTRADA DO CLIENTE E ENVIANDO PARA O SERVIDOR */
     while( true ){
 
         memset(bufferServer,0x0,MAX_MSG);
@@ -97,7 +100,7 @@ int main(int argc, char *argv[]){
         send( socketId_Cliente, bufferServer, MAX_MSG, 0 );
     }
 
-
+    /* 9. FECHANDO O SOCKET DO CLIENTE */
     std::cout << "Conexao entre os sockets do Cliente e do Servidor foi quebrada..." << std::endl;
     close(socketId_Cliente);
     
@@ -105,21 +108,21 @@ int main(int argc, char *argv[]){
 
 }    
 
-
+/**
+ * @brief   Escutando continuamente as mensagens do servidor
+ * @param   arg Conexão do cliente com o servidor
+ * @param   addrCliente_sin_addr    Endereço IP do cliente
+ */
 void escutarServidor( void *arg, struct in_addr addrServidor_sin_addr){
     
 	int socketId_Servidor_Conexao = *((int *)arg);
     char msg[MAX_MSG] = ""; //-> Buffer que guardara a mensagem recebida e a que sera enviada
-    int messageSizeReceived; //-> Tamanho da mensagem recebida
 
-    /// SOCKET DO SERVIDOR **COMUNICANDO-SE** COM O SOCKET DO CLIENTE
+    /// RECEBENDO MENSAGEM DO SOCKET SERVIDOR E IMPRIMINDO
     while (true){
-        /// RECEBENDO MENSAGEM DO SOCKET SERVIDOR
         memset(msg,0x0,MAX_MSG);
-
-        messageSizeReceived = recv( socketId_Servidor_Conexao, msg, MAX_MSG, 0 );
+        recv( socketId_Servidor_Conexao, msg, MAX_MSG, 0 );
         std::cout << msg << std::endl;
-        // std::cout << "\nServidor (IP: " << inet_ntoa(addrServidor_sin_addr)  << ") disse: " << msg << "\n";
     }
 
 }
