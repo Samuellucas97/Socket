@@ -4,22 +4,22 @@
 
 Nesta pasta contém a implementação de um socket nas linguagens de programacao [C++], [Java] e [Python] que faz o uso do protocolo da camada de transporte TCP ou UDP referente ao trabalho da 2ª unidade da disciplina de _Redes de Computadores_ ministrada pelo dr. Silvio da Costa Sampaio do bacharelado em Tecnologia da Informação na Universidade Federal do Rio Grande do Norte (__UFRN__).
 
-- [Organizacao das pastas](#organizacao-das-pastas) - Organizacao de subpasta do diretorio raiz.
+- [Organização das pastas](#organização-das-pastas) - Organizacao de subpasta do diretório raiz.
 - [Autores](#autores) - Autores do projeto.
 
 [C++]:https://pt.wikipedia.org/wiki/C%2B%2B
 [Java]:https://pt.wikipedia.org/wiki/Java_(linguagem_de_programa%C3%A7%C3%A3o)
 [Python]:https://pt.wikipedia.org/wiki/Python
 
-## Organizacao das pastas  
+## Organização das pastas  
 
-O diretorio raiz contem as seguinte subpastas:
+O diretório raiz contem as seguinte subpastas:
 
 | Nome da pasta: | Descrição: | 
 | ---------- | ------------- |
-|`java` 	|Contem implementacao em **Java** de sockets cliente e servidor com protocolos TCP e UDP.  
-|`cplusplus` 	|Contem implementacao em **C++** de sockets cliente e servidor com protocolos TCP e UDP.  
-|`python` 	|Contem implementacao em **Python** de sockets cliente e servidor com protocolos TCP e UDP.  
+|`java` 	|Contem implementação em **Java** de sockets cliente e servidor com protocolos TCP e UDP.  
+|`cplusplus` 	|Contem implementação em **C++** de sockets cliente e servidor com protocolos TCP e UDP.  
+|`python` 	|Contem implementação em **Python** de sockets cliente e servidor com protocolos TCP e UDP.  
   
 ## Autores  
 
