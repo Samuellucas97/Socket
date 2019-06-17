@@ -1,5 +1,5 @@
 /**
- * @file    client.cpp
+ * @file    clientTCP.cpp
  * @brief   Contém uma implementação de um socket cliente que faz uso do protocolo TCP
  */
 

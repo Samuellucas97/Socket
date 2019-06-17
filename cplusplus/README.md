@@ -36,8 +36,7 @@ Em contrapartida, no caso dos clientes, haverá a necessidade de inserir alguns 
 
 ```
 $ ./bin/tcpClient Lucas localhost
-```
-
+```  
 Além disso, caso deseje ver a documentação desses códigos, execute  
 
 ```

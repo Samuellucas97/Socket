@@ -70,7 +70,7 @@ tcpClient: $(OBJ_DIR)/tcp/client.o
 
 # Alvo (target) para a construcao do objeto client.o
 # Define o arquivo client.cpp como dependência.
-$(OBJ_DIR)/tcp/client.o:	$(SRC_DIR)/tcp/client.cpp
+$(OBJ_DIR)/tcp/client.o:	$(SRC_DIR)/tcp/clientTCP.cpp
 	$(CC) -c $(CFLAGS) -o $@ $<
 
 
@@ -85,7 +85,7 @@ tcpServer: $(OBJ_DIR)/tcp/server.o
 
 # Alvo (target) para a construcao do objeto tcpServer.o
 # Define o arquivo tcpServer.cpp como dependência.
-$(OBJ_DIR)/tcp/server.o:	$(SRC_DIR)/tcp/server.cpp
+$(OBJ_DIR)/tcp/server.o:	$(SRC_DIR)/tcp/serverTCP.cpp
 	$(CC) -c $(CFLAGS) -o $@ $<
 
 doc:

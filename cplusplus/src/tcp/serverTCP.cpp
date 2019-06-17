@@ -1,5 +1,5 @@
 /**
- * @file    server.cpp
+ * @file    serverTCP.cpp
  * @brief   Contém uma implementação de um socket servidor que faz uso do protocolo TCP que suporta múltiplos clientes
  */
 

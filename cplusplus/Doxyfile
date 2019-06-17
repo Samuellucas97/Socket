@@ -1,6 +1,6 @@
-PROJECT_NAME = "Implementacao de socket"
-PROJECT_BRIEF = REDES
-OUTPUT_LANGUAGE	= Portugues
+PROJECT_NAME = "Socket UDP e TCP"
+PROJECT_BRIEF = "Implementação de sockets TCP e UDP"
+OUTPUT_LANGUAGE	= Portuguese
 RECURSIVE = YES
 GENERATE_HTML = YES
 HTML_OUTPUT	= doc
