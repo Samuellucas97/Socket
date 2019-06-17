@@ -17,9 +17,9 @@ O diretório raiz contem as seguinte subpastas:
 
 | Nome da pasta: | Descrição: | 
 | ---------- | ------------- |
-|`java` 	|Contem implementação em **Java** de sockets cliente e servidor com protocolos TCP e UDP.  
-|`cplusplus` 	|Contem implementação em **C++** de sockets cliente e servidor com protocolos TCP e UDP.  
-|`python` 	|Contem implementação em **Python** de sockets cliente e servidor com protocolos TCP e UDP.  
+|`java` 	|Contém implementação em **Java** de sockets cliente e servidor com protocolos TCP e UDP.  
+|`cplusplus` 	|Contém implementação em **C++** de sockets cliente e servidor com protocolos TCP e UDP.  
+|`python` 	|Contém implementação em **Python** de sockets cliente e servidor com protocolos TCP e UDP.  
   
 ## Autores  
 
