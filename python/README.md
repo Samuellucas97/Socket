@@ -17,7 +17,7 @@ Faz-se necessario que haja o interpretador do Python instalado na maquina a ser 
 
 
 Execute na linha de terminal, para que ocorra a interpretacao, de acordo com o respectivo tipo de socket que deseje utilizar. Diante disso, 
-por exemplo, caso seja o socket cliente que faz uso do protocolo [UDP], `client.py`
+por exemplo, caso seja o socket cliente que faz uso do protocolo [UDP], `client.py`, lembrado que em ambus é necessário iniciar o server.py primeiro.
 
 ```
 $ python3 ./src/udp/client.py
