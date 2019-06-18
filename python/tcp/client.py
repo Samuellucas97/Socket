@@ -10,11 +10,19 @@ clienteName  = ''
 if len(sys.argv) > 1:
     clienteName = sys.argv[1]
 
-def always_listening(socketCliente): # Usanda na thread que ficara sempre escultando as mensagens do servidor
-    while (True):
-        if socketCliente != None:
-            data = socketCliente.recv(MESSAGE_SIZE) 
-            print(data.decode("utf8"))
+def always_listening(socketCliente):  
+    online = True                                  # Usanda na thread que ficara sempre escultando as mensagens do servidor
+    while (online):
+       
+        data = socketCliente.recv(MESSAGE_SIZE) 
+        if data.decode("utf8") == 'finalizar':
+            online = False
+            pass
+            sys.exit()
+
+        print(data.decode("utf8"))
+
+    
 
 
 with socket.socket( socket.AF_INET, socket.SOCK_STREAM ) as socketCliente:      
@@ -23,11 +31,19 @@ with socket.socket( socket.AF_INET, socket.SOCK_STREAM ) as socketCliente:
     message = str.encode('')
 
     listening = Thread(target=always_listening, args=(socketCliente,) ) # sempre escutando o servidor
-    listening.start()                                                   # Inicia a Thread para escutar o servidor
+    listening.start()     
+                                                                        
     socketCliente.send( clienteName.encode("utf8" ) )                   # mandando o nome do cliante para o servidor 
+    online = True
 
+    while (online):
+        mens = str.encode( input() )
+        socketCliente.send( mens )                     # Enviando mensagem para o socket do Servidor
+        if "Q" == mens or "sair " == mens or "Sair" == mens  : 
+            online = False
 
-    while (True):
-        socketCliente.send( str.encode( input() ) )                     # Enviando mensagem para o socket do Servidor
     socketCliente.close()
+
+sys.exit()
+
             
