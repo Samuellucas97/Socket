@@ -1,15 +1,50 @@
 import socket 
+import sys
+import pickle
 
-HOST = "127.0.0.1"
-PORT_NUMBER = 65431
 
-with socket.socket( socket.AF_INET, socket.SOCK_DGRAM) as socketCliente:
-    socketCliente.connect ((HOST, PORT_NUMBER))
+def main():    
+    
+    ## VERIFICANDO ARGUMENTOS  
+    if(sys.argv[1] || sys.argv[2])
+        print("uso: python3 client.py <IP do servidor> <mensagem>")
+        sys.exit()
+
+    host = sys.argv[1]
+    portNumber = 65431
+    message = sys.argv[2]
+    server_address = (host, portNumber)
+
+    ## CRIANDO SOCKET CLIENTE 
+    clientSocket = socket.socket( socket.AF_INET, socket.SOCK_DGRAM)
+            
+    try:
+
+        ## ENVIANDO PARA O SERVIDOR
+        sent = sock.sendto(message, server_address)
+
+        # Receive response
+        data, server = sock.recvfrom(4096)
+        print('received {!r}'.format(data))
+
+    finally:
+        print('closing socket')
+        sock.close()
+
+
+
+
+if __name__=='__main__':
+    main()
+
+
+
+
     print("O socket do Cliente está conectado ao socket do Servidor\n") 
     message = str.encode('')
 
     while (message.decode() != "Sair"):
-        server_address = (HOST, PORT_NUMBER)
+        s
         message = str.encode( input() )
         sent = socketCliente.sendto( message, server_address  )  # Enviando mensagem para o socket do Servidor
         
