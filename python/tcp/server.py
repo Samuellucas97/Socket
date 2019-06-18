@@ -15,22 +15,23 @@ now = datetime.now()
 def start_server(): # apenas inicia o server
     server()
 
-def client_thread(connection, ip, port, clientes={},max_buffer_size = 10000): # Essa funcão vai gerenciar cada uma das threads 
+def client_thread(connection, ip, port, clientes={},  clientName='' ,max_buffer_size = 10000): # Essa funcão vai gerenciar cada uma das threads 
         is_active = True
-        
+
         while is_active: 
             client_input = receive_input(connection, max_buffer_size, ip, port)
 
             if "Q" == client_input:
-                print("Cliente está requisitando a finalização da comunicação.")
+                print("Cliente"+ clientName +" esta requisitando a finalização da comunicação.")
                 connection.close()
-                print("Conexão  " + ip + ":" + port + " fechada.")
+                print("Conexao  " + ip + ":" + port + " fechada.")
                 is_active = False
             else:
-                print(": {}".format(client_input)) # imprime a messagem do cliente no servidor
+                print( clientName + " disse :" +  client_input) # imprime a messagem do cliente no servidor
                 for soc in clientes: # broadcast para os clientes
                     if soc != str(ip + ":" + port):
-                        clientes[soc].send((": {}".format(client_input)  ).encode("utf8"))
+                        clientes[soc].send((clientName + " disse :" +  client_input  ).encode("utf8"))
+
                 
 
 def receive_input(connection, max_buffer_size, ip='yyy', port='yyy'): # Faz aquilo que o nome diz, recebe input dos clientes
@@ -38,9 +39,9 @@ def receive_input(connection, max_buffer_size, ip='yyy', port='yyy'): # Faz aqui
     client_input_size = sys.getsizeof(client_input)
     
     if client_input_size > max_buffer_size:
-        print("O tamnho do input passado é maior que o permitido : {}".format(client_input_size))
+        print("O tamnho do input passado e maior que o permitido : {}".format(client_input_size))
 
-    connection.send(("Mensagem  recebida às " +now.strftime("%H:%M:%S")).encode("utf8"))
+    connection.send(("Mensagem  recebida as " +now.strftime("%H:%M:%S")).encode("utf8"))
 
     decoded_input = client_input.decode("utf8").rstrip()  # decode and strip end of line
     result = process_input(decoded_input, ip, port)
@@ -48,7 +49,8 @@ def receive_input(connection, max_buffer_size, ip='yyy', port='yyy'): # Faz aqui
     return result
 
 def process_input(input_str, ip='xxx', port='xxx'):  # função auxiliar para a função receive_input
-    return ( "["+now.strftime("%H:%M:%S")+ "][Cliente: " +  ip+ ':'+ port + " ]:" + str(input_str))
+    #return ( "["+now.strftime("%H:%M:%S")+ "][Cliente: " +  ip+ ':'+ port + " ]:" + str(input_str))
+    return (  str(input_str) +' as ('+ now.strftime("%H:%M:%S")+")")
     
 
 
@@ -74,13 +76,14 @@ def server():
             connection, address = socketServidor.accept()      # Retirando da fila de requisições uma requisição
             ip, port = str(address[0]), str(address[1])
             key_socket = str(ip+':'+port) # chave usando no dicinario para endentificar cada um dos clientes
+            clientName = connection.recv(100).decode("utf8").rstrip()
 
-            print("----- Conectado com  " + ip + ":" + port + " ------")
+            print("- Conectado com o cliente " + clientName +" com o socket; [" + ip + ":" + port + "] -")
 
             try:
                 if key_socket not in socketsClients: # Aqui coloco no dicionario cada uma das threads
                     connClients[key_socket] =  connection
-                    socketsClients[key_socket] = Thread(target=client_thread, args=(connection, ip, port, connClients))
+                    socketsClients[key_socket] = Thread(target=client_thread, args=(connection, ip, port, connClients, clientName))
                     
 
             except:

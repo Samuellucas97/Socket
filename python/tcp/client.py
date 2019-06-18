@@ -1,33 +1,33 @@
-
 #!/usr/bin/env python3
-
-import socket  # Biblioteca para sockets
+import socket  
 from threading import Thread
+import sys
 
-HOST = "127.0.0.1"  # (localhost)
-PORT_NUMBER = 65431 # Porta usada pelo socket do Servidor
-MESSAGE_SIZE = 40 # Quantidade de caracteres que uma mensagem pode transmitir  
+HOST = "127.0.0.1"                                  
+PORT_NUMBER = 65431                                 
+MESSAGE_SIZE = 80
+clienteName  = ''                                
+if len(sys.argv) > 1:
+    clienteName = sys.argv[1]
 
-def always_listening(socketCliente):
+def always_listening(socketCliente): # Usanda na thread que ficara sempre escultando as mensagens do servidor
     while (True):
         if socketCliente != None:
-            data = socketCliente.recv(MESSAGE_SIZE) # Recebendo mensagem do socket do Servidor
-            print(data.decode())
+            data = socketCliente.recv(MESSAGE_SIZE) 
+            print(data.decode("utf8"))
 
 
-with socket.socket( socket.AF_INET, socket.SOCK_STREAM ) as socketCliente:      # Criando o socket do Cliente
-    socketCliente.connect( (HOST, PORT_NUMBER) )    # Conectando socket do Cliente ao socket do Servidor
+with socket.socket( socket.AF_INET, socket.SOCK_STREAM ) as socketCliente:      
+    socketCliente.connect( (HOST, PORT_NUMBER) )    
     print("O socket do Cliente está conectado ao socket do Servidor\n") 
     message = str.encode('')
 
     listening = Thread(target=always_listening, args=(socketCliente,) ) # sempre escutando o servidor
-    listening.start()
+    listening.start()                                                   # Inicia a Thread para escutar o servidor
+    socketCliente.send( clienteName.encode("utf8" ) )                   # mandando o nome do cliante para o servidor 
+
 
     while (True):
-        socketCliente.send( str.encode( input() ) )  # Enviando mensagem para o socket do Servidor
-        
-        #always_listening(socketCliente)
-        
-
+        socketCliente.send( str.encode( input() ) )                     # Enviando mensagem para o socket do Servidor
     socketCliente.close()
             
