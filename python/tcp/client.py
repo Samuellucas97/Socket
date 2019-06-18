@@ -6,28 +6,25 @@ import sys
 HOST = "127.0.0.1"                                  
 PORT_NUMBER = 65431                                 
 MESSAGE_SIZE = 80
-clienteName  = ''                                
+clienteName  = ''    
+
+if len(sys.argv) == 2:          # opcoes para que se possar passar o enderecoe porta do servidor como argumentos
+    clienteName =   sys.argv[1]
+if len(sys.argv) == 3:
+    clienteName =   sys.argv[1]
+    HOST =          sys.argv[2]
+if len(sys.argv) == 4:
+    clienteName =   sys.argv[1]
+    HOST =          sys.argv[2]
+    PORT_NUMBER =   sys.argv[3]
+
+
 if len(sys.argv) > 1:
     clienteName = sys.argv[1]
 
-def always_listening(socketCliente):  
-    online = True                                  # Usanda na thread que ficara sempre escultando as mensagens do servidor
-    while (online):
-        try:
-            data = socketCliente.recv(MESSAGE_SIZE) 
-            if data.decode("utf8") == 'finalizar':
-                online = False
-                return
-                sys.exit()
-            else:
-                print(data.decode("utf8"))
-        except:
-            return
-    sys.exit()
 
 class Always_listening  (Thread):
     def __init__(self, socketCliente):
-        #self.socketCliente = socketCliente
         super(Always_listening, self).__init__()
         self._is_running = True
 
@@ -51,14 +48,11 @@ class Always_listening  (Thread):
         self._is_running = False
 
 
-
-
 with socket.socket( socket.AF_INET, socket.SOCK_STREAM ) as socketCliente:      
     socketCliente.connect( (HOST, PORT_NUMBER) )    
     print("O socket do Cliente está conectado ao socket do Servidor\n") 
     message = str.encode('')
 
-    #listening = Thread(target=always_listening, args=(socketCliente,) ) # sempre escutando o servidor
     listening = Always_listening(socketCliente)
     
     listening.start()     

@@ -8,6 +8,10 @@ import sys
 HOST = "127.0.0.1"  # (localhost)
 PORT_NUMBER = 65431  # Porta usada pelo socket do Servidor
 
+if len(sys.argv) == 3: # Opcao para a passagem de de ip, porta como argumentos 
+    HOST        =  sys.argv[1]
+    PORT_NUMBER =  sys.argv[2]
+
 socketsClients = {} # dicionário de clientes 
 connClients = {}
 now = datetime.now()
