@@ -2,11 +2,10 @@ import socket
 import sys
 import pickle
 
-
 def main():    
-    
-    ## VERIFICANDO ARGUMENTOS  
-    if(sys.argv[1] || sys.argv[2])
+
+    ## 1. VERIFICANDO ARGUMENTOS  
+    if len(sys.argv) != 3:
         print("uso: python3 client.py <IP do servidor> <mensagem>")
         sys.exit()
 
@@ -15,43 +14,22 @@ def main():
     message = sys.argv[2]
     server_address = (host, portNumber)
 
-    ## CRIANDO SOCKET CLIENTE 
+    ## 2. CRIANDO SOCKET CLIENTE 
     clientSocket = socket.socket( socket.AF_INET, socket.SOCK_DGRAM)
-            
+    print('Iniciando socket do cliente...')
+        
     try:
+        ## 3. ENVIANDO MENSAGEM PARA O SERVIDOR
+        sent = clientSocket.sendto(pickle.dumps( message ), server_address)
 
-        ## ENVIANDO PARA O SERVIDOR
-        sent = sock.sendto(message, server_address)
-
-        # Receive response
-        data, server = sock.recvfrom(4096)
-        print('received {!r}'.format(data))
+        ## 4. RECEBENDO MENSAGEM DO SERVIDOR
+        data, server = clientSocket.recvfrom(1024)
+        messageResponse = pickle.loads(data)
+        print(messageResponse)
 
     finally:
-        print('closing socket')
-        sock.close()
-
-
-
+        print('Fechando socket do cliente')
+        clientSocket.close()
 
 if __name__=='__main__':
     main()
-
-
-
-
-    print("O socket do Cliente está conectado ao socket do Servidor\n") 
-    message = str.encode('')
-
-    while (message.decode() != "Sair"):
-        s
-        message = str.encode( input() )
-        sent = socketCliente.sendto( message, server_address  )  # Enviando mensagem para o socket do Servidor
-        
-        data = socketCliente.recvfrom(4096) # Recebendo mensagem do socket do Servidor
-        
-        print("Servidor disse: ", data )
-
-
-    socketCliente.close()
-

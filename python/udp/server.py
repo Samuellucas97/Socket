@@ -1,25 +1,36 @@
-#!/usr/bin/env python3
-from datetime import datetime
 import socket
+import pickle
+from datetime import datetime
 
-HOST = '127.0.0.1'
-PORT_NUMBER = 65431
-MESSAGE_SIZE = 40
+def main():  
+	host = socket.gethostbyname( socket.gethostname() )
+	portNumber = 65431
 
-with socket.socket( socket.AF_INET, socket.SOCK_DGRAM) as socketServer:
-    socketServer.bind((HOST, PORT_NUMBER))
-    print("Ligacao entre socjet Servidor e porta " + str(PORT_NUMBER))
-    print( "O socket do Servidor está escutando com sucesso...\n")
+    ## 1. CRIANDO SOCKET SERVIDOR
+	serverSocket = socket.socket( socket.AF_INET, socket.SOCK_DGRAM)
+	print('Iniciando socket do servidor (IP: ' + str(host) + ')')
 
-    while (True):
-        now = datetime.now()
-        data, address = socketServer.recvfrom(4096)
-        print("Foi recebido " + str(len(data)) + " bytes de " + str(address[0]) )
-        print(data)
-
-
-        if data:
-            backMassagestr = ('Mensagem ERROAQUI recebida as ' + now.strftime("%H:%M:%S") )
-            backMassage = bytes(backMassagestr, 'utf-8')
-            sent = socketServer.sendto( backMassage, address)
-            
+    ## 2. LIGANDO SOCKET À PORTA 
+	serverSocket.bind( (host, portNumber) )
+	print('Ligando-se socket à porta ' + str(portNumber) + '\n')
+    
+	try:
+		while True:
+			## 3. RECEBENDO MENSAGEM DE CLIENTE
+			data, address = serverSocket.recvfrom(1024)
+			message = pickle.loads(data)
+			print(message + ': de ' + str(address[0]) + ':UDP(' + str(portNumber) + ')' )
+		
+			if data:
+				## 4. RESPONDENDO MENSAGEM DE CLIENTE
+				hourNow = datetime.now()
+				messageResponse = ('Mensagem ' + message +' recebida as ' + hourNow.strftime("%H:%M:%S") )
+				serverSocket.sendto( pickle.dumps(messageResponse), address)
+    
+	finally:
+		print('Fechando socket do servidor')
+		serverSocket.close()
+    
+if __name__=='__main__':
+	main()
+    
